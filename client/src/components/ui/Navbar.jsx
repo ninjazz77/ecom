@@ -21,7 +21,9 @@ const Navbar = () => {
   const searchRef = useRef(null);
 
   const resolvedUserId = user?._id || user?.id;
-  const cartCount = cart?.items?.length || 0;
+  const cartCount =
+    cart?.items?.reduce((count, item) => count + Number(item.quantity || 0), 0) ||
+    0;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -34,12 +36,20 @@ const Navbar = () => {
   }, [searchOpen]);
 
   useEffect(() => {
-    setMenuOpen(false);
-    setSearchOpen(false);
+    const timeoutId = window.setTimeout(() => {
+      setMenuOpen(false);
+      setSearchOpen(false);
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, [location.pathname]);
 
   const logout = async () => {
-    try { await api.post("/user/logout", {}); } catch {}
+    try {
+      await api.post("/user/logout", {});
+    } catch {
+      // Local logout should still proceed if the server session is gone.
+    }
     localStorage.removeItem("accessToken");
     dispatch(setUser(null));
     dispatch(setCart(null));

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "@/lib/api";
 import {
@@ -15,6 +15,29 @@ import { toast } from "sonner";
 import { useDispatch } from "react-redux";
 import { setCart } from "@/redux/productsSlice";
 
+const currencyFormatter = new Intl.NumberFormat("en-IN");
+
+const formatCurrency = (value) => `₹${currencyFormatter.format(Number(value || 0))}`;
+
+const getCartItemDetails = (item) => {
+  const product =
+    item?.productId && typeof item.productId === "object" ? item.productId : null;
+  const productId = product?._id || item?.productId || item?._id;
+  const price = Number(product?.productPrice ?? item?.price ?? 0);
+  const quantity = Number(item?.quantity || 0);
+
+  return {
+    id: String(productId || item?._id || ""),
+    name: product?.productName || item?.productName || "Product unavailable",
+    image: product?.productImg?.[0]?.url || item?.productImg?.[0]?.url || "/Flux.png",
+    price,
+    quantity,
+    category: product?.category || item?.category || "Cart item",
+    lineTotal: price * quantity,
+    isAvailable: Boolean(product),
+  };
+};
+
 const Cart = () => {
   const [cart, setCartState] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -24,7 +47,7 @@ const Cart = () => {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const dispatch = useDispatch();
 
-  const fetchCart = async () => {
+  const fetchCart = useCallback(async () => {
     try {
       setLoading(true);
       const res = await api.get("/cart");
@@ -37,11 +60,11 @@ const Cart = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [dispatch]);
 
   useEffect(() => {
     fetchCart();
-  }, []);
+  }, [fetchCart]);
 
   const updateQty = async (productId, type) => {
     try {
@@ -145,22 +168,20 @@ const Cart = () => {
             {/* Items */}
             <div className="space-y-4">
               {items.map((item) => {
-                const pid = item.productId?._id || item.productId;
-                const name = item.productId?.productName || "Product";
-                const img = item.productId?.productImg?.[0]?.url || "/Flux.png";
-                const price = Number(
-                  item.productId?.productPrice || item.price || 0,
-                );
-                const cat = item.productId?.category || "";
+                const details = getCartItemDetails(item);
+                const pid = details.id;
                 const isBusy = busyId.startsWith(String(pid));
 
                 return (
-                  <div key={item._id} className="glass-card p-5 flex gap-5">
+                  <div
+                    key={item._id || pid}
+                    className="glass-card p-5 flex gap-5"
+                  >
                     {/* Image */}
                     <div className="h-24 w-24 flex-shrink-0 rounded-2xl overflow-hidden bg-white/4">
                       <img
-                        src={img}
-                        alt={name}
+                        src={details.image}
+                        alt={details.name}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -168,14 +189,19 @@ const Cart = () => {
                     {/* Info */}
                     <div className="flex-1 min-w-0">
                       <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">
-                        {cat}
+                        {details.category}
                       </p>
                       <h3 className="font-semibold text-white mt-0.5 truncate">
-                        {name}
+                        {details.name}
                       </h3>
                       <p className="mt-1 font-display text-lg font-black gradient-text">
-                        ₹{price.toLocaleString()}
+                        {formatCurrency(details.price)}
                       </p>
+                      {!details.isAvailable && (
+                        <p className="mt-1 text-xs text-amber-400">
+                          This product needs to be refreshed or removed.
+                        </p>
+                      )}
                     </div>
 
                     {/* Controls */}
@@ -192,17 +218,23 @@ const Cart = () => {
                       <div className="flex items-center gap-2 glass rounded-2xl p-1.5">
                         <button
                           onClick={() => updateQty(pid, "decrease")}
-                          disabled={busyId === `${pid}-decrease`}
+                          disabled={
+                            !details.isAvailable ||
+                            busyId === `${pid}-decrease`
+                          }
                           className="h-8 w-8 rounded-xl bg-white/8 flex items-center justify-center text-white hover:bg-white/15 transition font-bold text-lg"
                         >
                           −
                         </button>
                         <span className="w-8 text-center text-sm font-semibold text-white">
-                          {item.quantity}
+                          {details.quantity}
                         </span>
                         <button
                           onClick={() => updateQty(pid, "increase")}
-                          disabled={busyId === `${pid}-increase`}
+                          disabled={
+                            !details.isAvailable ||
+                            busyId === `${pid}-increase`
+                          }
                           className="h-8 w-8 rounded-xl bg-white/8 flex items-center justify-center text-white hover:bg-white/15 transition font-bold text-lg"
                         >
                           +
@@ -210,7 +242,7 @@ const Cart = () => {
                       </div>
 
                       <p className="text-sm text-white/40">
-                        ₹{(price * item.quantity).toLocaleString()}
+                        {formatCurrency(details.lineTotal)}
                       </p>
                     </div>
                   </div>
@@ -254,7 +286,7 @@ const Cart = () => {
                   <div className="flex justify-between text-white/50">
                     <span>Subtotal ({items.length} items)</span>
                     <span className="text-white">
-                      ₹{total.toLocaleString()}
+                      {formatCurrency(total)}
                     </span>
                   </div>
                   <div className="flex justify-between text-white/50">
@@ -264,20 +296,20 @@ const Cart = () => {
                         shipping === 0 ? "text-green-400" : "text-white"
                       }
                     >
-                      {shipping === 0 ? "Free" : `₹${shipping}`}
+                      {shipping === 0 ? "Free" : formatCurrency(shipping)}
                     </span>
                   </div>
                   {shipping > 0 && (
                     <p className="text-[11px] text-amber-400 flex items-center gap-1">
                       <Zap className="h-3 w-3" />
-                      Add ₹{(999 - total).toLocaleString()} more for free
+                      Add {formatCurrency(999 - total)} more for free
                       shipping
                     </p>
                   )}
                   <div className="border-t border-white/8 pt-3 flex justify-between font-semibold text-white text-base">
                     <span>Total</span>
                     <span className="font-display font-black gradient-text text-xl">
-                      ₹{grandTotal.toLocaleString()}
+                      {formatCurrency(grandTotal)}
                     </span>
                   </div>
                 </div>

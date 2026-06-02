@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import { Eye, EyeOff, Zap, ArrowRight, Shield, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { setUser } from "@/redux/userSlice";
+import { setCart } from "@/redux/productsSlice";
 import api, { getApiErrorMessage } from "@/lib/api";
 
 const Login = () => {
@@ -33,6 +34,14 @@ const Login = () => {
       if (res.data.success) {
         dispatch(setUser(res.data.user));
         localStorage.setItem("accessToken", res.data.accessToken);
+        try {
+          const cartRes = await api.get("/cart");
+          if (cartRes.data?.success) {
+            dispatch(setCart(cartRes.data.cart));
+          }
+        } catch {
+          dispatch(setCart(null));
+        }
         toast.success("Welcome back! ✨");
         navigate("/");
       }
@@ -92,9 +101,11 @@ const Login = () => {
             {[
               { icon: Shield, title: "Secure Session", text: "End-to-end protected" },
               { icon: ArrowRight, title: "Fast Checkout", text: "Skip the long forms" },
-            ].map(({ icon: Icon, title, text }) => (
+            ].map(({ icon, title, text }) => (
               <div key={title} className="glass-card p-5">
-                <Icon className="h-5 w-5 text-violet-400 mb-3" />
+                {React.createElement(icon, {
+                  className: "h-5 w-5 text-violet-400 mb-3",
+                })}
                 <p className="font-semibold text-white text-sm">{title}</p>
                 <p className="text-xs text-white/40 mt-1">{text}</p>
               </div>

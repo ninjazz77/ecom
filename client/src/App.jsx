@@ -16,6 +16,7 @@ import AdminLogin from "./pages/AdminLogin";
 import ProtectedRoute from "./components/ProtectedRoute";
 import api from "./lib/api";
 import { setUser } from "./redux/userSlice";
+import { setCart } from "./redux/productsSlice";
 
 const router = createBrowserRouter([
   {
@@ -124,7 +125,7 @@ const App = () => {
         if (res.data?.success && res.data?.user) {
           dispatch(setUser(res.data.user));
         }
-      } catch (error) {
+      } catch {
         localStorage.removeItem("accessToken");
         dispatch(setUser(null));
       }
@@ -132,6 +133,29 @@ const App = () => {
 
     restoreSession();
   }, [dispatch, user]);
+
+  React.useEffect(() => {
+    const loadCart = async () => {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        dispatch(setCart(null));
+        return;
+      }
+
+      try {
+        const res = await api.get("/cart");
+        if (res.data?.success) {
+          dispatch(setCart(res.data.cart));
+        }
+      } catch (error) {
+        if (error?.response?.status === 401) {
+          dispatch(setCart(null));
+        }
+      }
+    };
+
+    loadCart();
+  }, [dispatch, user?.id, user?._id]);
 
   return (
     <>
