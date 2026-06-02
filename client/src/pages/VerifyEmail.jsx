@@ -18,7 +18,7 @@ const VerifyEmail = () => {
       );
 
       if (res.data.success) {
-        setStatus("✅ Email Verified Successfully!");
+        setStatus("✅ Email verified successfully!");
         setTimeout(() => navigate("/login"), 2000);
       }
     } catch (error) {
@@ -36,10 +36,11 @@ const VerifyEmail = () => {
   }, [token]);
 
   return (
-    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_top,_#fff7ed,_#f8fafc_45%,_#e2e8f0)] px-4">
-      <div className="w-full max-w-md rounded-3xl border border-white/70 bg-white/90 p-8 text-center shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur">
-        <h2 className="text-xl font-semibold text-slate-950">{status}</h2>
-        <p className="mt-3 text-sm text-slate-500">
+    <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4 py-12 text-white">
+      <div className="w-full max-w-md surface-card p-10 text-center">
+        <p className="badge-pill mb-4">Email verification</p>
+        <h2 className="text-2xl font-semibold text-white">{status}</h2>
+        <p className="mt-3 text-sm leading-7 text-slate-300">
           You will be redirected once verification completes.
         </p>
       </div>

@@ -337,7 +337,7 @@ const AdminPanel = () => {
                 Admin dashboard
               </p>
               <h1 className="mt-3 text-3xl font-semibold md:text-5xl">
-                Operational control for Ekart
+                Operational control for Flux
               </h1>
               <p className="mt-3 max-w-2xl text-sm text-slate-300 md:text-base">
                 Manage products, users, and order operations from a single
@@ -615,7 +615,8 @@ const AdminPanel = () => {
                         }
                       />
                       <p className="mt-1 text-xs text-slate-500">
-                        Up to {MAX_PRODUCT_IMAGES} images. Selected images: {productFiles.length}
+                        Up to {MAX_PRODUCT_IMAGES} images. Selected images:{" "}
+                        {productFiles.length}
                       </p>
                     </div>
                   </div>

@@ -1223,7 +1223,7 @@ const AdminDashboardPage = () => {
               </div>
               <div>
                 <p className="text-xs uppercase tracking-[0.25em] text-orange-300">
-                  Ekart Admin
+                  Flux Admin
                 </p>
                 <p className="mt-1 text-lg font-semibold">
                   Production Dashboard

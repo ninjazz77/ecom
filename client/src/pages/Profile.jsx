@@ -17,7 +17,7 @@ const Profile = () => {
   const dispatch = useDispatch();
   const activeUserId = userId || user?._id || user?.id;
 
-  const [loading, setLoading] = useState(false); // ✅ LOADING STATE
+  const [loading, setLoading] = useState(false);
 
   const [updateUser, setUpdateUser] = useState({
     firstName: user?.firstName || "",
@@ -57,12 +57,10 @@ const Profile = () => {
     });
   }, [user]);
 
-  // ✅ TEXT INPUT CHANGE
   const handleChange = (e) => {
     setUpdateUser({ ...updateUser, [e.target.name]: e.target.value });
   };
 
-  // ✅ FILE CHANGE
   const handleFileChange = (e) => {
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
@@ -74,7 +72,6 @@ const Profile = () => {
     });
   };
 
-  // ✅ SUBMIT HANDLER WITH LOADING
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -151,38 +148,38 @@ const Profile = () => {
   };
 
   return (
-    <div className="px-4 pb-16 pt-28 lg:px-0">
+    <div className="px-4 pb-16 pt-28 lg:px-0 bg-slate-950 text-white">
       <div className="mx-auto max-w-7xl">
         <div className="mb-8 grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">
-          <div className="rounded-[2rem] border border-white/70 bg-[linear-gradient(135deg,rgba(15,23,42,0.95),rgba(71,85,105,0.9))] p-8 text-white shadow-[0_24px_70px_rgba(15,23,42,0.16)]">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-white/55">
+          <div className="rounded-[2rem] border border-slate-800/70 bg-slate-950/95 p-8 shadow-[0_24px_70px_rgba(0,0,0,0.45)]">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-cyan-300/80">
               Account center
             </p>
             <h1 className="mt-3 text-4xl font-semibold leading-tight">
               Your profile, preferences, and security controls in one place.
             </h1>
-            <div className="mt-6 flex items-center gap-4 rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur">
+            <div className="mt-6 flex items-center gap-4 rounded-3xl border border-slate-800/70 bg-slate-900/80 p-4">
               <img
                 src={updateUser.profilePic}
                 alt="profile"
                 className="h-16 w-16 rounded-2xl object-cover"
               />
               <div>
-                <p className="text-lg font-semibold">
+                <p className="text-lg font-semibold text-white">
                   {updateUser.firstName || "Your account"}
                 </p>
-                <p className="text-sm text-white/65">
+                <p className="text-sm text-slate-400">
                   {updateUser.email || user?.email}
                 </p>
               </div>
             </div>
-            <div className="mt-6 grid grid-cols-2 gap-3 text-sm text-white/75">
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <UserCircle2 className="h-5 w-5 text-white/80" />
+            <div className="mt-6 grid grid-cols-2 gap-3 text-sm text-slate-400">
+              <div className="rounded-2xl border border-slate-800/70 bg-slate-900/80 p-4">
+                <UserCircle2 className="h-5 w-5 text-cyan-300" />
                 <p className="mt-3 font-semibold text-white">Profile details</p>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <ShieldCheck className="h-5 w-5 text-white/80" />
+              <div className="rounded-2xl border border-slate-800/70 bg-slate-900/80 p-4">
+                <ShieldCheck className="h-5 w-5 text-cyan-300" />
                 <p className="mt-3 font-semibold text-white">Security</p>
               </div>
             </div>
@@ -190,9 +187,9 @@ const Profile = () => {
 
           <Tabs
             defaultValue="profile"
-            className="rounded-[2rem] border border-white/70 bg-white/85 p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur"
+            className="rounded-[2rem] border border-slate-800/70 bg-slate-900/90 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur"
           >
-            <TabsList className="grid w-full grid-cols-2 rounded-full bg-slate-100 p-1">
+            <TabsList className="grid w-full grid-cols-2 rounded-full bg-slate-800 p-1">
               <TabsTrigger value="profile" className="rounded-full">
                 Profile
               </TabsTrigger>
@@ -203,20 +200,22 @@ const Profile = () => {
 
             <TabsContent value="profile" className="mt-6">
               <div className="grid gap-6 lg:grid-cols-[0.7fr_1.3fr]">
-                <Card className="border border-white/70 bg-white/90">
+                <Card className="border border-slate-800/70 bg-slate-950/90">
                   <CardHeader>
-                    <CardTitle className="text-2xl">Profile photo</CardTitle>
+                    <CardTitle className="text-2xl text-white">
+                      Profile photo
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="flex flex-col items-center">
                     <img
                       src={updateUser.profilePic}
                       alt="profile"
-                      className="h-36 w-36 rounded-full object-cover shadow-[0_20px_50px_rgba(15,23,42,0.12)] ring-4 ring-white"
+                      className="h-36 w-36 rounded-full object-cover shadow-[0_20px_50px_rgba(0,0,0,0.35)] ring-4 ring-cyan-300/20"
                     />
 
                     <Label
                       htmlFor="profilePic"
-                      className="mt-5 cursor-pointer rounded-full bg-slate-950 px-4 py-2.5 font-semibold text-white transition hover:bg-slate-800"
+                      className="mt-5 cursor-pointer rounded-full bg-cyan-500 px-4 py-2.5 font-semibold text-slate-950 transition hover:bg-cyan-400"
                     >
                       Change picture
                     </Label>
@@ -231,9 +230,9 @@ const Profile = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="border border-white/70 bg-white/90">
+                <Card className="border border-slate-800/70 bg-slate-950/90">
                   <CardHeader>
-                    <CardTitle className="text-2xl">
+                    <CardTitle className="text-2xl text-white">
                       Personal information
                     </CardTitle>
                   </CardHeader>
@@ -242,7 +241,7 @@ const Profile = () => {
                     <form onSubmit={handleSubmit} className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <Label>First Name</Label>
+                          <Label className="text-slate-200">First Name</Label>
                           <Input
                             name="firstName"
                             value={updateUser.firstName}
@@ -251,7 +250,7 @@ const Profile = () => {
                         </div>
 
                         <div>
-                          <Label>Last Name</Label>
+                          <Label className="text-slate-200">Last Name</Label>
                           <Input
                             name="lastName"
                             value={updateUser.lastName}
@@ -260,12 +259,16 @@ const Profile = () => {
                         </div>
 
                         <div>
-                          <Label>Email</Label>
-                          <Input value={updateUser.email} disabled />
+                          <Label className="text-slate-200">Email</Label>
+                          <Input
+                            value={updateUser.email}
+                            disabled
+                            className="bg-slate-900 text-white"
+                          />
                         </div>
 
                         <div>
-                          <Label>Phone Number</Label>
+                          <Label className="text-slate-200">Phone Number</Label>
                           <Input
                             name="phoneNumber"
                             value={updateUser.phoneNumber}
@@ -274,7 +277,7 @@ const Profile = () => {
                         </div>
 
                         <div>
-                          <Label>Address</Label>
+                          <Label className="text-slate-200">Address</Label>
                           <Input
                             name="address"
                             value={updateUser.address}
@@ -283,7 +286,7 @@ const Profile = () => {
                         </div>
 
                         <div>
-                          <Label>City</Label>
+                          <Label className="text-slate-200">City</Label>
                           <Input
                             name="city"
                             value={updateUser.city}
@@ -292,7 +295,7 @@ const Profile = () => {
                         </div>
 
                         <div>
-                          <Label>Zip Code</Label>
+                          <Label className="text-slate-200">Zip Code</Label>
                           <Input
                             name="zipCode"
                             value={updateUser.zipCode}
@@ -313,9 +316,11 @@ const Profile = () => {
             </TabsContent>
 
             <TabsContent value="security" className="mt-6">
-              <Card className="border border-white/70 bg-white/90">
+              <Card className="border border-slate-800/70 bg-slate-950/90">
                 <CardHeader>
-                  <CardTitle className="text-2xl">Change password</CardTitle>
+                  <CardTitle className="text-2xl text-white">
+                    Change password
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handlePasswordSubmit} className="grid gap-4">
@@ -325,6 +330,7 @@ const Profile = () => {
                       placeholder="Current password"
                       value={passwordForm.currentPassword}
                       onChange={handlePasswordChange}
+                      className="bg-slate-900 text-white"
                     />
                     <Input
                       type="password"
@@ -332,6 +338,7 @@ const Profile = () => {
                       placeholder="New password"
                       value={passwordForm.newPassword}
                       onChange={handlePasswordChange}
+                      className="bg-slate-900 text-white"
                     />
                     <Input
                       type="password"
@@ -339,6 +346,7 @@ const Profile = () => {
                       placeholder="Confirm new password"
                       value={passwordForm.confirmPassword}
                       onChange={handlePasswordChange}
+                      className="bg-slate-900 text-white"
                     />
                     <Button type="submit" disabled={loading}>
                       {loading ? "Saving..." : "Save password"}

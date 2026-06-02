@@ -50,27 +50,27 @@ const FilterSidebar = ({
   };
 
   return (
-    <aside className="sticky top-24 hidden h-max w-80 rounded-[1.75rem] border border-white/70 bg-white/85 p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur md:block">
-      <div className="mb-5 flex items-center gap-3">
-        <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-950 text-white">
+    <aside className="sticky top-24 hidden w-80 rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-[0_30px_90px_rgba(0,0,0,0.18)] backdrop-blur-xl md:block">
+      <div className="mb-6 flex items-center gap-3">
+        <span className="flex h-12 w-12 items-center justify-center rounded-[1.5rem] bg-cyan-400/15 text-cyan-300 shadow-[0_18px_40px_rgba(56,189,248,0.16)]">
           <Filter className="h-5 w-5" />
         </span>
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-500">
-            Smart filters
+          <p className="text-xs uppercase tracking-[0.28em] text-slate-400">
+            curated filters
           </p>
-          <h2 className="text-lg font-semibold text-slate-950">
-            Refine results
+          <h2 className="text-lg font-semibold text-white">
+            Refine your search
           </h2>
         </div>
       </div>
 
-      <div className="space-y-5">
+      <div className="space-y-6">
         <div className="relative">
           <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <Input
             type="text"
-            placeholder="Search products"
+            placeholder="Search within products"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-11"
@@ -78,7 +78,7 @@ const FilterSidebar = ({
         </div>
 
         <section className="space-y-3">
-          <h3 className="text-sm font-semibold uppercase tracking-[0.25em] text-slate-500">
+          <h3 className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-400">
             Category
           </h3>
           <div className="flex flex-wrap gap-2">
@@ -87,7 +87,11 @@ const FilterSidebar = ({
                 key={index}
                 type="button"
                 onClick={() => handleCategoryClick(item)}
-                className={`rounded-full border px-3 py-2 text-sm font-medium transition ${category === item ? "border-slate-950 bg-slate-950 text-white" : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"}`}
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                  category === item
+                    ? "bg-cyan-400 text-slate-950"
+                    : "bg-white/10 text-slate-200 hover:bg-white/15"
+                }`}
               >
                 {item.toUpperCase()}
               </button>
@@ -96,11 +100,11 @@ const FilterSidebar = ({
         </section>
 
         <section className="space-y-3">
-          <h3 className="text-sm font-semibold uppercase tracking-[0.25em] text-slate-500">
+          <h3 className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-400">
             Brand
           </h3>
           <select
-            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-slate-400"
+            className="w-full rounded-[1.5rem] border border-white/10 bg-white/8 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
             value={brand}
             onChange={handleBrandChange}
           >
@@ -114,10 +118,10 @@ const FilterSidebar = ({
 
         <section className="space-y-3">
           <div className="flex items-center justify-between gap-3">
-            <h3 className="text-sm font-semibold uppercase tracking-[0.25em] text-slate-500">
-              Price Range
+            <h3 className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-400">
+              Price range
             </h3>
-            <p className="text-sm font-medium text-slate-700">
+            <p className="text-sm font-semibold text-slate-200">
               ₹{priceRange[0]} - ₹{priceRange[1]}
             </p>
           </div>
@@ -126,18 +130,16 @@ const FilterSidebar = ({
             <input
               type="number"
               min="0"
-              max="999999"
               value={priceRange[0]}
               onChange={handleMinChange}
-              className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none"
+              className="rounded-[1.5rem] border border-white/10 bg-white/8 px-4 py-3 text-sm text-white outline-none"
             />
             <input
               type="number"
               min="0"
-              max="999999"
               value={priceRange[1]}
               onChange={handleMaxChange}
-              className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none"
+              className="rounded-[1.5rem] border border-white/10 bg-white/8 px-4 py-3 text-sm text-white outline-none"
             />
           </div>
 
@@ -146,23 +148,22 @@ const FilterSidebar = ({
             min="0"
             max="999999"
             step="100"
-            className="w-full accent-slate-950"
+            className="w-full accent-cyan-400"
             value={priceRange[0]}
             onChange={handleMinChange}
           />
-
           <input
             type="range"
             min="0"
             max="999999"
             step="100"
-            className="w-full accent-slate-950"
+            className="w-full accent-cyan-400"
             value={priceRange[1]}
             onChange={handleMaxChange}
           />
         </section>
 
-        <Button onClick={resetFilters} className="w-full">
+        <Button onClick={resetFilters} className="w-full" variant="secondary">
           <RotateCcw className="h-4 w-4" />
           Reset filters
         </Button>

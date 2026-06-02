@@ -5,9 +5,7 @@ import {
   Headphones,
   Laptop,
   MonitorSmartphone,
-  ShieldCheck,
   Sparkles,
-  Star,
   Truck,
   Watch,
 } from "lucide-react";
@@ -21,48 +19,31 @@ const Home = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const sections = useMemo(() => {
-    const activeProducts = products.filter((item) => item.isActive !== false);
-
-    return {
-      featured: activeProducts.filter((item) => item.isFeatured).slice(0, 4),
-      trending: [...activeProducts]
-        .sort(
-          (a, b) => Number(b.productPrice || 0) - Number(a.productPrice || 0),
-        )
-        .slice(0, 4),
-      arrivals: [...activeProducts].slice(-4).reverse(),
-      bestSellers: activeProducts
-        .filter((item) => Number(item.stock || 0) > 10)
-        .slice(0, 4),
-      flashDeals: [...activeProducts]
-        .sort(
-          (a, b) => Number(a.productPrice || 0) - Number(b.productPrice || 0),
-        )
-        .slice(0, 4),
-    };
-  }, [products]);
+  const featured = useMemo(
+    () => products.filter((product) => product.isFeatured).slice(0, 4),
+    [products],
+  );
 
   const categories = [
     {
       icon: Laptop,
       label: "Electronics",
-      value: "Laptops, tablets, and accessories",
+      description: "Laptops, tablets, and ergonomic accessories.",
     },
     {
       icon: MonitorSmartphone,
       label: "Smart Living",
-      value: "Connected devices for modern homes",
+      description: "Connected devices for modern homes.",
     },
     {
       icon: Headphones,
       label: "Audio",
-      value: "Immersive sound and premium listening",
+      description: "Immersive sound for every room.",
     },
     {
       icon: Watch,
       label: "Wearables",
-      value: "Lifestyle tech and daily essentials",
+      description: "Lifestyle tech that moves with you.",
     },
   ];
 
@@ -70,7 +51,7 @@ const Home = () => {
     const fetchProducts = async () => {
       try {
         const res = await api.get("/product/getallproducts");
-        setProducts((res.data.products || []).slice(0, 4));
+        setProducts(res.data.products || []);
       } catch (error) {
         console.error("Failed to load featured products:", error);
       } finally {
@@ -82,91 +63,70 @@ const Home = () => {
   }, []);
 
   return (
-    <div>
+    <div className="bg-slate-950 text-white">
       <Hero />
       <Features />
 
-      <section className="mx-auto max-w-7xl px-4 pb-10 pt-4 lg:px-0 lg:pb-14">
-        <div className="grid gap-4 md:grid-cols-3">
-          {[
-            [
-              "10k+",
-              "orders fulfilled",
-              "Reliable fulfillment designed for trust",
-            ],
-            [
-              "48h",
-              "priority dispatch",
-              "A premium experience with fast logistics",
-            ],
-            [
-              "4.9/5",
-              "customer rating",
-              "High satisfaction across product discovery",
-            ],
-          ].map(([value, label, detail]) => (
-            <div
-              key={label}
-              className="rounded-[1.75rem] border border-white/70 bg-white/80 p-5 shadow-[0_16px_50px_rgba(15,23,42,0.06)] backdrop-blur"
-            >
-              <p className="text-3xl font-semibold text-slate-950">{value}</p>
-              <p className="mt-1 text-sm font-semibold uppercase tracking-[0.25em] text-slate-500">
-                {label}
-              </p>
-              <p className="mt-2 text-sm text-slate-500">{detail}</p>
+      <section className="bg-[#fff3c4] text-slate-950">
+        <div className="mx-auto max-w-7xl px-4 py-4 lg:px-6">
+          <div className="rounded-[2rem] border border-slate-200/70 bg-white/90 p-6 shadow-[0_25px_70px_rgba(15,23,42,0.08)]">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-[0.35em] text-amber-700">
+                  Product milestones
+                </p>
+                <h2 className="mt-3 text-3xl font-bold sm:text-4xl">
+                  10 Cr+ happy buyers and counting
+                </h2>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <span className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white">
+                  New drops daily
+                </span>
+                <span className="rounded-full bg-slate-950/90 px-4 py-2 text-sm font-semibold text-white">
+                  Fast delivery
+                </span>
+              </div>
             </div>
-          ))}
+          </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-10 lg:px-0">
-        <div className="grid gap-4 lg:grid-cols-2">
-          <div className="overflow-hidden rounded-[2rem] border border-white/70 bg-[linear-gradient(135deg,rgba(15,23,42,0.96),rgba(71,85,105,0.94))] p-8 text-white shadow-[0_25px_70px_rgba(15,23,42,0.18)]">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-white/75">
-              <Sparkles className="h-4 w-4" />
-              Hero promotion
-            </div>
-            <h2 className="mt-5 max-w-lg text-3xl font-semibold leading-tight md:text-4xl">
-              Premium drops, seasonal offers, and elevated shopping in one
-              place.
+      <section className="mx-auto max-w-7xl px-4 py-10 lg:px-6">
+        <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr] items-center">
+          <div className="rounded-[2rem] bg-white/5 p-8 shadow-[0_30px_90px_rgba(0,0,0,0.18)] border border-white/10">
+            <span className="badge-pill bg-[#fff4d2] text-slate-950">
+              Shop by category
+            </span>
+            <h2 className="mt-6 text-4xl font-semibold text-white md:text-5xl">
+              Find what fits your mood in seconds.
             </h2>
-            <p className="mt-4 max-w-lg text-sm leading-7 text-white/75">
-              Merchandising that feels editorial, navigation that feels instant,
-              and product journeys built around conversion.
+            <p className="mt-4 max-w-xl text-base leading-8 text-slate-300">
+              High-impact category cards, bold visuals, and a shopping path
+              designed for effortless browsing.
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link
-                to="/products"
-                className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:-translate-y-0.5"
-              >
-                Shop featured
-                <ArrowRight className="h-4 w-4" />
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link to="/products" className="btn-primary">
+                Shop all
               </Link>
-              <Link
-                to="/cart"
-                className="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-              >
+              <Link to="/cart" className="btn-secondary">
                 View cart
               </Link>
             </div>
           </div>
-
           <div className="grid gap-4 sm:grid-cols-2">
             {categories.map((category) => {
               const Icon = category.icon;
               return (
-                <div
-                  key={category.label}
-                  className="rounded-[2rem] border border-white/70 bg-white/85 p-5 shadow-[0_16px_50px_rgba(15,23,42,0.06)] backdrop-blur transition hover:-translate-y-1"
-                >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-950 text-white">
-                    <Icon className="h-5 w-5" />
+                <div key={category.label} className="category-card p-6">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-[1.5rem] bg-amber-300 text-slate-950">
+                    <Icon className="h-6 w-6" />
                   </div>
-                  <h3 className="mt-4 text-xl font-semibold text-slate-950">
+                  <h3 className="mt-5 text-2xl font-semibold text-slate-950">
                     {category.label}
                   </h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-500">
-                    {category.value}
+                  <p className="mt-3 text-sm leading-7 text-slate-700">
+                    {category.description}
                   </p>
                 </div>
               );
@@ -175,29 +135,30 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-10 lg:px-0">
-        <div className="mb-6 flex items-end justify-between gap-4">
+      <section className="mx-auto max-w-7xl px-4 py-10 lg:px-6">
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="section-label">Featured products</p>
-            <h2 className="section-title mt-2">
-              Curated picks that feel premium
+            <p className="badge-pill">Featured collection</p>
+            <h2 className="mt-4 text-3xl font-semibold text-white md:text-4xl">
+              Curated products with a premium visual story.
             </h2>
           </div>
           <Link
             to="/products"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700 transition hover:text-slate-950"
+            className="text-sm font-semibold text-cyan-300 transition hover:text-white"
           >
-            View all
-            <ArrowRight className="h-4 w-4" />
+            Explore all products
+            <ArrowRight className="inline-block h-4 w-4" />
           </Link>
         </div>
+
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {loading ? (
             Array.from({ length: 4 }).map((_, index) => (
               <ProductCard key={index} product={{ productImg: [] }} loading />
             ))
-          ) : sections.featured.length > 0 ? (
-            sections.featured.map((product) => (
+          ) : featured.length > 0 ? (
+            featured.map((product) => (
               <ProductCard
                 key={product._id}
                 product={product}
@@ -205,104 +166,10 @@ const Home = () => {
               />
             ))
           ) : (
-            <div className="col-span-full rounded-[1.75rem] border border-dashed border-slate-300 bg-white/80 p-10 text-center text-slate-500 shadow-sm backdrop-blur">
-              No featured products yet.
+            <div className="col-span-full surface-card p-10 text-center text-slate-300">
+              No featured products available.
             </div>
           )}
-        </div>
-      </section>
-
-      {[
-        ["Trending now", sections.trending],
-        ["Best sellers", sections.bestSellers],
-        ["Flash deals", sections.flashDeals],
-        ["New arrivals", sections.arrivals],
-      ].map(([title, lane]) => (
-        <section key={title} className="mx-auto max-w-7xl px-4 py-8 lg:px-0">
-          <div className="mb-5 flex items-end justify-between gap-4">
-            <div>
-              <p className="section-label">{title}</p>
-              <h2 className="section-title mt-2">
-                {title === "Flash deals"
-                  ? "Limited-time picks with high visual impact"
-                  : title}
-              </h2>
-            </div>
-            <Link
-              to="/products"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700 transition hover:text-slate-950"
-            >
-              Browse catalog
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-          <div className="flex snap-x gap-5 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {(loading ? Array.from({ length: 4 }) : lane).map((item, index) => (
-              <div
-                key={item?._id || index}
-                className="min-w-[280px] max-w-[280px] snap-start sm:min-w-[320px] sm:max-w-[320px]"
-              >
-                {loading ? (
-                  <ProductCard product={{ productImg: [] }} loading />
-                ) : (
-                  <ProductCard product={item} loading={false} />
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-      ))}
-
-      <section className="mx-auto max-w-7xl px-4 py-12 lg:px-0">
-        <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-[2rem] border border-white/70 bg-white/85 p-8 shadow-[0_18px_60px_rgba(15,23,42,0.08)] backdrop-blur">
-            <p className="section-label">Trust & service</p>
-            <h2 className="section-title mt-2">
-              Built like a premium retail platform
-            </h2>
-            <div className="mt-6 grid gap-4 sm:grid-cols-3">
-              {[
-                [Truck, "Fast fulfillment"],
-                [ShieldCheck, "Protected checkout"],
-                [Star, "High rating"],
-              ].map(([FeatureIcon, label]) => (
-                <div
-                  key={label}
-                  className="rounded-2xl bg-slate-50 p-4 text-center"
-                >
-                  {React.createElement(FeatureIcon, {
-                    className: "mx-auto h-5 w-5 text-slate-950",
-                  })}
-                  <p className="mt-3 text-sm font-semibold text-slate-950">
-                    {label}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-[2rem] border border-slate-950 bg-slate-950 p-8 text-white shadow-[0_18px_60px_rgba(15,23,42,0.18)]">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-white/60">
-              Newsletter
-            </p>
-            <h2 className="mt-3 text-3xl font-semibold">
-              Get drops, offers, and product launches first.
-            </h2>
-            <p className="mt-3 text-sm leading-7 text-white/70">
-              A lightweight newsletter block with clean inputs and strong
-              hierarchy keeps the page feeling premium without clutter.
-            </p>
-            <div className="mt-6 flex gap-3">
-              <input
-                className="flex-1 rounded-full border border-white/15 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/45 outline-none"
-                placeholder="Email address"
-                type="email"
-              />
-              <button className="rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100">
-                Join
-              </button>
-            </div>
-          </div>
         </div>
       </section>
     </div>

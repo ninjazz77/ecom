@@ -2,16 +2,7 @@ import React, { useEffect, useState } from "react";
 import api from "@/lib/api";
 import { Button } from "@/components/button";
 import { Input } from "@/components/input";
-import {
-  Loader2,
-  Minus,
-  Plus,
-  ShieldCheck,
-  ShoppingBag,
-  Sparkles,
-  Trash2,
-  Truck,
-} from "lucide-react";
+import { Loader2, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useDispatch } from "react-redux";
 import { setCart } from "@/redux/productsSlice";
@@ -96,27 +87,27 @@ const Cart = () => {
   const items = cart?.items || [];
 
   return (
-    <div className="px-4 pb-16 pt-28 lg:px-0">
+    <div className="px-4 pb-16 pt-28 lg:px-0 bg-[#fff7dd] text-slate-950">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-8 rounded-[2rem] border border-white/70 bg-[linear-gradient(135deg,rgba(15,23,42,0.95),rgba(71,85,105,0.9))] p-8 text-white shadow-[0_24px_70px_rgba(15,23,42,0.16)]">
+        <div className="mb-8 rounded-[2rem] border border-slate-200/70 bg-white p-8 shadow-[0_24px_70px_rgba(15,23,42,0.08)]">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-white/55">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-amber-600/90">
                 Shopping cart
               </p>
-              <h1 className="mt-3 text-4xl font-semibold leading-tight md:text-5xl">
-                A calm, premium checkout flow.
+              <h1 className="mt-3 text-4xl font-semibold leading-tight md:text-5xl text-slate-950">
+                A bright, modern checkout flow.
               </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-white/70">
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
                 Review items, apply coupons, and place your order through a
-                streamlined cart experience with visible trust cues.
+                streamlined cart designed for clarity and quick decisions.
               </p>
             </div>
-            <div className="rounded-3xl border border-white/10 bg-white/10 px-5 py-4 backdrop-blur">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.35em] text-white/55">
+            <div className="rounded-3xl border border-amber-100 bg-amber-100/90 px-5 py-4">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.35em] text-amber-700">
                 Subtotal
               </p>
-              <p className="mt-2 text-3xl font-semibold">
+              <p className="mt-2 text-3xl font-semibold text-slate-950">
                 ₹{Number(cart?.totalPrice || 0).toLocaleString()}
               </p>
             </div>
@@ -124,12 +115,13 @@ const Cart = () => {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center rounded-[1.75rem] border border-white/70 bg-white/80 p-10 text-slate-500 shadow-sm backdrop-blur">
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading cart...
+          <div className="flex items-center justify-center rounded-[1.75rem] border border-amber-100 bg-white p-10 text-slate-500 shadow-sm">
+            <Loader2 className="mr-2 h-4 w-4 animate-spin text-amber-500" />{" "}
+            Loading cart...
           </div>
         ) : items.length === 0 ? (
-          <div className="rounded-[1.75rem] border border-dashed border-slate-300 bg-white/80 p-10 text-center text-slate-500 shadow-sm backdrop-blur">
-            <ShoppingBag className="mx-auto h-10 w-10 text-slate-400" />
+          <div className="rounded-[1.75rem] border border-dashed border-amber-300/40 bg-white p-10 text-center text-slate-600 shadow-sm">
+            <ShoppingBag className="mx-auto h-10 w-10 text-amber-500" />
             <p className="mt-4 text-lg font-semibold text-slate-950">
               Your cart is empty.
             </p>
@@ -143,11 +135,11 @@ const Cart = () => {
               {items.map((item) => (
                 <div
                   key={item._id}
-                  className="flex flex-col gap-4 rounded-[1.75rem] border border-white/70 bg-white/90 p-4 shadow-[0_20px_50px_rgba(15,23,42,0.06)] backdrop-blur md:flex-row md:items-center md:justify-between"
+                  className="flex flex-col gap-4 rounded-[1.75rem] border border-slate-200/70 bg-white shadow-[0_20px_50px_rgba(15,23,42,0.08)] p-4 md:flex-row md:items-center md:justify-between"
                 >
                   <div className="flex items-center gap-4">
                     <img
-                      src={item.productId?.productImg?.[0]?.url || "/Ekart.png"}
+                      src={item.productId?.productImg?.[0]?.url || "/Flux.png"}
                       alt={item.productId?.productName || "Product"}
                       className="h-20 w-20 rounded-2xl object-cover"
                     />
@@ -158,7 +150,7 @@ const Cart = () => {
                       <p className="text-sm text-slate-500">
                         {item.productId?.category || "General"}
                       </p>
-                      <p className="mt-1 text-sm font-medium text-slate-700">
+                      <p className="mt-1 text-sm font-medium text-amber-600">
                         ₹
                         {Number(
                           item.productId?.productPrice || item.price || 0,
@@ -168,7 +160,7 @@ const Cart = () => {
                   </div>
 
                   <div className="flex flex-wrap items-center gap-3">
-                    <div className="flex items-center rounded-full border border-slate-200 bg-slate-50 p-1">
+                    <div className="flex items-center rounded-full border border-slate-200 bg-slate-100 p-1">
                       <Button
                         type="button"
                         variant="ghost"
@@ -184,7 +176,7 @@ const Cart = () => {
                           `${item.productId?._id || item.productId}-decrease`
                         }
                       >
-                        <Minus className="h-4 w-4" />
+                        <Minus className="h-4 w-4 text-slate-950" />
                       </Button>
                       <span className="min-w-10 text-center text-sm font-semibold text-slate-950">
                         {item.quantity}
@@ -204,7 +196,7 @@ const Cart = () => {
                           `${item.productId?._id || item.productId}-increase`
                         }
                       >
-                        <Plus className="h-4 w-4" />
+                        <Plus className="h-4 w-4 text-slate-950" />
                       </Button>
                     </div>
 
@@ -227,7 +219,7 @@ const Cart = () => {
             </div>
 
             <div className="space-y-4 lg:sticky lg:top-24 lg:self-start">
-              <div className="rounded-[1.75rem] border border-white/70 bg-white/90 p-5 shadow-[0_20px_50px_rgba(15,23,42,0.06)] backdrop-blur">
+              <div className="rounded-[1.75rem] border border-slate-200/70 bg-white p-5 shadow-[0_20px_50px_rgba(15,23,42,0.08)]">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-500">
                   Order summary
                 </p>
@@ -250,52 +242,42 @@ const Cart = () => {
                     Coupon
                   </p>
                   <div className="mt-3 flex gap-2">
-                    <Input placeholder="Enter coupon code" />
+                    <Input
+                      placeholder="Enter coupon code"
+                      className="bg-white text-slate-950"
+                    />
                     <Button variant="outline" className="shrink-0">
                       Apply
                     </Button>
                   </div>
                 </div>
-                <div className="mt-5 flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3">
-                  <span className="font-medium text-slate-700">Total</span>
-                  <span className="text-2xl font-semibold text-slate-950">
+                <div className="mt-5 flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700">
+                  <span className="font-medium text-slate-600">Total</span>
+                  <span className="font-semibold text-slate-950">
                     ₹{Number(cart?.totalPrice || 0).toLocaleString()}
                   </span>
                 </div>
-                <div className="mt-4 flex items-center gap-3 text-xs text-slate-500">
-                  <ShieldCheck className="h-4 w-4 text-slate-700" />
-                  Secure checkout and data protection are enabled.
-                </div>
-                <Button
-                  type="button"
-                  onClick={handleCheckout}
-                  disabled={checkoutLoading || items.length === 0}
-                  className="mt-5 w-full"
-                >
-                  {checkoutLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    "Place order"
-                  )}
-                </Button>
-              </div>
-
-              <div className="rounded-[1.75rem] border border-white/70 bg-white/90 p-5 shadow-[0_20px_50px_rgba(15,23,42,0.06)] backdrop-blur">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-500">
-                  Delivery promise
-                </p>
-                <div className="mt-4 space-y-3 text-sm text-slate-600">
-                  <div className="flex items-center gap-3">
-                    <Truck className="h-4 w-4 text-slate-700" />
-                    Fast dispatch across priority zones
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Sparkles className="h-4 w-4 text-slate-700" />
-                    Premium packaging and presentation
-                  </div>
+                <div className="mt-5 flex flex-col gap-3">
+                  <Input
+                    value={shippingAddress}
+                    onChange={(e) => setShippingAddress(e.target.value)}
+                    placeholder="Shipping address"
+                    className="bg-white text-slate-950"
+                  />
+                  <Button
+                    onClick={handleCheckout}
+                    disabled={checkoutLoading}
+                    className="w-full"
+                  >
+                    {checkoutLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Placing order...
+                      </>
+                    ) : (
+                      "Place order"
+                    )}
+                  </Button>
                 </div>
               </div>
             </div>

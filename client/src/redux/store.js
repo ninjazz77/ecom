@@ -13,7 +13,7 @@ import {
 import storage from "redux-persist/lib/storage";
 
 const persistConfig = {
-  key: "Ekart",
+  key: "Flux",
   version: 1,
   storage,
 };

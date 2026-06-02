@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../button";
-import { Heart, ShoppingCart, Star } from "lucide-react";
+import { Heart, ShoppingCart, Sparkles } from "lucide-react";
 import { Skeleton } from "./skeleton";
 import { toast } from "sonner";
 import { useDispatch } from "react-redux";
@@ -19,7 +19,7 @@ const ProductCard = ({ product, loading }) => {
   const addtoCart = async (productId) => {
     const token = localStorage.getItem("accessToken");
     if (!token) {
-      toast.error("Please login first to add items to your cart.");
+      toast.error("Login to add items to your cart.");
       setTimeout(() => navigate("/login"), 900);
       return;
     }
@@ -27,32 +27,33 @@ const ProductCard = ({ product, loading }) => {
     try {
       const res = await api.post("/cart/add", { productId });
       if (res.data.success) {
-        toast.success("Product added to cart");
+        toast.success("Added to cart");
         dispatch(setCart(res.data.cart));
       }
     } catch (error) {
       toast.error(getApiErrorMessage(error, "Unable to add item"));
     }
   };
+
   return (
-    <div className="group h-max overflow-hidden rounded-[1.75rem] border border-white/70 bg-white/90 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_70px_rgba(15,23,42,0.12)]">
-      <div className="relative aspect-square w-full overflow-hidden bg-slate-100">
+    <div className="group overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white/95 shadow-[0_25px_80px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_36px_110px_rgba(15,23,42,0.18)]">
+      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[1.75rem] bg-slate-100">
         {loading ? (
-          <Skeleton className="w-full h-full rounded-lg" />
+          <Skeleton className="h-full w-full rounded-[1.75rem]" />
         ) : (
           <>
             <img
-              src={productImg[0]?.url || "/Ekart.png"}
+              src={productImg[0]?.url || "/Flux.png"}
               alt={productName || "Product"}
-              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 cursor-pointer"
+              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
             />
-            <div className="absolute left-4 top-4 inline-flex items-center gap-1 rounded-full border border-white/70 bg-white/85 px-3 py-1 text-[11px] font-semibold text-slate-700 shadow-sm backdrop-blur">
-              <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-              Premium pick
+            <div className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full bg-amber-100/90 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-amber-700 backdrop-blur-sm">
+              <Sparkles className="h-4 w-4 text-amber-500" />
+              {product?.isFeatured ? "Featured" : "Collection"}
             </div>
             <button
               type="button"
-              className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-white/85 text-slate-700 shadow-sm backdrop-blur transition hover:bg-slate-950 hover:text-white"
+              className="absolute right-4 top-4 inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white/90 text-slate-950 shadow-[0_12px_30px_rgba(15,23,42,0.12)] transition hover:bg-white"
               onClick={() => toast.info("Wishlist coming soon")}
             >
               <Heart className="h-4 w-4" />
@@ -60,55 +61,58 @@ const ProductCard = ({ product, loading }) => {
           </>
         )}
       </div>
+
       {loading ? (
-        <div className="px-2 space-y-2 my-2">
-          <Skeleton className="w-[200px] h-4" />
-          <Skeleton className="w-[100px] h-4" />
-          <Skeleton className="w-[150px] h-8" />
+        <div className="space-y-4 p-5">
+          <Skeleton className="h-4 w-3/4 rounded-full" />
+          <Skeleton className="h-4 w-1/2 rounded-full" />
+          <Skeleton className="h-11 rounded-[1.5rem]" />
         </div>
       ) : (
         <div className="space-y-4 p-5">
           <div>
-            <h1 className="line-clamp-2 min-h-12 text-sm font-semibold text-slate-950">
+            <h2 className="line-clamp-2 text-lg font-semibold text-slate-950">
               {productName}
-            </h1>
-            <p className="mt-1 text-xs uppercase tracking-[0.2em] text-slate-500">
+            </h2>
+            <p className="mt-2 text-sm uppercase tracking-[0.22em] text-slate-500">
               {product?.category || "General"}
             </p>
-            <div className="mt-2 flex flex-wrap gap-2 text-[11px] font-medium">
-              {product?.isFeatured ? (
-                <span className="rounded-full bg-amber-100 px-2 py-1 text-amber-700">
-                  Featured
-                </span>
-              ) : null}
-              {!isActive ? (
-                <span className="rounded-full bg-red-100 px-2 py-1 text-red-700">
-                  Disabled
-                </span>
-              ) : null}
-              <span className="rounded-full bg-slate-100 px-2 py-1 text-slate-600">
-                {stock > 0 ? `${stock} in stock` : "Out of stock"}
-              </span>
-            </div>
           </div>
-          <div className="flex items-end justify-between gap-3">
+          <div className="flex flex-wrap gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+            {product?.isFeatured && (
+              <span className="rounded-full bg-amber-100 px-2 py-1 text-amber-700">
+                Featured
+              </span>
+            )}
+            {!isActive && (
+              <span className="rounded-full bg-rose-100 px-2 py-1 text-rose-600">
+                Disabled
+              </span>
+            )}
+            <span className="rounded-full bg-slate-100 px-2 py-1 text-slate-700">
+              {stock > 0 ? `${stock} in stock` : "Out of stock"}
+            </span>
+          </div>
+          <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.25em] text-slate-500">
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
                 Starting at
               </p>
-              <h2 className="text-lg font-semibold text-slate-950">
+              <p className="mt-1 text-2xl font-semibold text-slate-950">
                 ₹{Number(productPrice || 0).toLocaleString()}
-              </h2>
+              </p>
             </div>
-            <p className="text-xs text-slate-500">Fast dispatch</p>
+            <span className="rounded-full bg-amber-100 px-3 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-amber-700">
+              Fast ship
+            </span>
           </div>
           <Button
             onClick={() => addtoCart(product._id)}
-            className="mb-1 w-full"
+            className="w-full"
             disabled={!canPurchase}
           >
             <ShoppingCart />
-            {canPurchase ? "Add to Cart" : "Unavailable"}
+            {canPurchase ? "Add to cart" : "Unavailable"}
           </Button>
         </div>
       )}

@@ -1,44 +1,47 @@
 import React from "react";
-import { Headphones, ShieldCheck, Sparkles, Truck } from "lucide-react";
+import {
+  RiRocketLine,
+  RiShieldCheckLine,
+  RiHeadphoneLine,
+  RiTrophyLine,
+} from "react-icons/ri";
 
 const Features = () => {
   return (
-    <section className="py-8">
+    <section className="py-10 lg:py-14">
       <div className="mx-auto max-w-7xl px-4">
         <div className="grid gap-4 md:grid-cols-4">
           {[
             [
-              Sparkles,
-              "Luxury curation",
-              "Assortments presented with editorial clarity.",
+              RiRocketLine,
+              "High-impact launches",
+              "Design-led merchandising that stands out.",
             ],
             [
-              Truck,
-              "Fast Delivery",
-              "Reliable shipping with clear order updates.",
+              RiShieldCheckLine,
+              "Trusted payments",
+              "Safe shopping for every order.",
             ],
             [
-              ShieldCheck,
-              "Secure Payments",
-              "Transactions protected with a modern checkout flow.",
+              RiHeadphoneLine,
+              "Premium support",
+              "Expert help when customers need it.",
             ],
             [
-              Headphones,
-              "24/7 Support",
-              "Help available when customers need it most.",
+              RiTrophyLine,
+              "Growth-ready",
+              "A platform built for conversion and retention.",
             ],
           ].map(([Icon, title, text]) => (
             <div
               key={title}
-              className="flex items-start gap-4 rounded-[1.75rem] border border-white/70 bg-white/80 px-5 py-5 shadow-[0_16px_50px_rgba(15,23,42,0.06)] backdrop-blur transition duration-200 hover:-translate-y-1 hover:shadow-[0_22px_60px_rgba(15,23,42,0.1)]"
+              className="surface-card p-6 transition hover:-translate-y-1"
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-950 text-white">
-                {React.createElement(Icon, { className: "h-6 w-6" })}
+              <div className="flex h-14 w-14 items-center justify-center rounded-[1.5rem] bg-cyan-400/15 text-cyan-300">
+                <Icon className="h-6 w-6" />
               </div>
-              <div>
-                <h3 className="font-semibold text-slate-950">{title}</h3>
-                <p className="mt-1 text-sm leading-6 text-slate-500">{text}</p>
-              </div>
+              <h3 className="mt-5 text-lg font-semibold text-white">{title}</h3>
+              <p className="mt-3 text-sm leading-7 text-slate-300">{text}</p>
             </div>
           ))}
         </div>
