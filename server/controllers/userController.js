@@ -7,7 +7,7 @@ import { SendOTPMail } from "../emailVerify/sendOTPMail.js";
 import cloudinary from "../utils/cloudinary.js";
 import getDataUri from "../utils/dataUri.js";
 
-const jwtSecret = process.env.SECRET_KEY || "ekart-dev-secret";
+const jwtSecret = process.env.SECRET_KEY || "flux-dev-secret";
 
 const normalizeEmail = (value) =>
   String(value || "")
@@ -98,27 +98,43 @@ export const register = async (req, res) => {
       if (!mailResult?.success) {
         throw new Error("Verification email could not be sent");
       }
-      console.log("✅ Verification email sent successfully to:", normalizedEmail);
+      console.log(
+        "✅ Verification email sent successfully to:",
+        normalizedEmail,
+      );
     } catch (mailErr) {
       console.error("❌ verifyEmail error:", mailErr?.message || mailErr);
       console.error("Full error details:", {
         message: mailErr.message,
         code: mailErr.code,
         command: mailErr.command,
-        stack: mailErr.stack?.split('\n').slice(0, 3).join('\n'),
+        stack: mailErr.stack?.split("\n").slice(0, 3).join("\n"),
       });
-      
+
       // Provide more specific error message to user
-      let userMessage = "Account created, but the verification email could not be delivered. Please use resend verification.";
-      
-      if (mailErr.message?.includes("Authentication failed") || mailErr.code === "EAUTH") {
-        userMessage = "Account created, but email service authentication failed. Please contact support or use resend verification.";
-      } else if (mailErr.message?.includes("connect") || mailErr.code === "ESOCKET") {
-        userMessage = "Account created, but cannot connect to email server. Please use resend verification.";
-      } else if (mailErr.message?.includes("timeout") || mailErr.code === "ETIMEDOUT") {
-        userMessage = "Account created, but email server connection timed out. Please use resend verification.";
+      let userMessage =
+        "Account created, but the verification email could not be delivered. Please use resend verification.";
+
+      if (
+        mailErr.message?.includes("Authentication failed") ||
+        mailErr.code === "EAUTH"
+      ) {
+        userMessage =
+          "Account created, but email service authentication failed. Please contact support or use resend verification.";
+      } else if (
+        mailErr.message?.includes("connect") ||
+        mailErr.code === "ESOCKET"
+      ) {
+        userMessage =
+          "Account created, but cannot connect to email server. Please use resend verification.";
+      } else if (
+        mailErr.message?.includes("timeout") ||
+        mailErr.code === "ETIMEDOUT"
+      ) {
+        userMessage =
+          "Account created, but email server connection timed out. Please use resend verification.";
       }
-      
+
       return res.status(201).json({
         success: true,
         message: userMessage,
@@ -132,7 +148,8 @@ export const register = async (req, res) => {
           isVerified: newUser.isVerified || false,
         },
         verificationEmailSent: false,
-        errorDetails: process.env.NODE_ENV === 'development' ? mailErr.message : undefined,
+        errorDetails:
+          process.env.NODE_ENV === "development" ? mailErr.message : undefined,
       });
     }
 
@@ -308,11 +325,18 @@ export const reVerify = async (req, res) => {
     await user.save();
 
     try {
-      const mailResult = await verifyEmail(token, normalizedEmail, requestOrigin);
+      const mailResult = await verifyEmail(
+        token,
+        normalizedEmail,
+        requestOrigin,
+      );
       if (!mailResult?.success) {
         throw new Error("Failed to send verification email");
       }
-      console.log("Verification email resent successfully to:", normalizedEmail);
+      console.log(
+        "Verification email resent successfully to:",
+        normalizedEmail,
+      );
       return res.status(200).json({
         success: true,
         message: "Verification email sent successfully! Check your inbox.",
@@ -321,7 +345,8 @@ export const reVerify = async (req, res) => {
       console.error("Email sending failed:", mailErr.message);
       return res.status(500).json({
         success: false,
-        message: "Failed to send verification email. Please try again later or contact support.",
+        message:
+          "Failed to send verification email. Please try again later or contact support.",
       });
     }
   } catch (error) {

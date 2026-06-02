@@ -52,12 +52,14 @@ const ProductCard = ({ product, loading, onOpenDetails }) => {
       onClick={() => onOpenDetails && onOpenDetails(product)}
       role="button"
       tabIndex={0}
-      onKeyDown={(e) => e.key === "Enter" && onOpenDetails && onOpenDetails(product)}
+      onKeyDown={(e) =>
+        e.key === "Enter" && onOpenDetails && onOpenDetails(product)
+      }
       aria-label={`View details for ${productName}`}
     >
       <div className="img-wrap">
         <img
-          src={productImg[0]?.url || "/Ekart.png"}
+          src={productImg[0]?.url || "/Flux.png"}
           alt={productName || "Product"}
           loading="lazy"
         />
@@ -76,15 +78,16 @@ const ProductCard = ({ product, loading, onOpenDetails }) => {
               <Zap className="h-2.5 w-2.5" /> Low Stock
             </span>
           )}
-          {!canPurchase && (
-            <span className="badge badge-red">Sold Out</span>
-          )}
+          {!canPurchase && <span className="badge badge-red">Sold Out</span>}
         </div>
 
         {/* Wishlist */}
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation(); toast.info("Wishlist coming soon!"); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            toast.info("Wishlist coming soon!");
+          }}
           className="absolute top-3 right-3 h-9 w-9 rounded-full glass flex items-center justify-center text-white/70 hover:text-pink-400 transition"
           aria-label="Add to wishlist"
         >
@@ -104,7 +107,7 @@ const ProductCard = ({ product, loading, onOpenDetails }) => {
 
         {/* Rating mock */}
         <div className="flex items-center gap-1.5">
-          {[1,2,3,4,5].map((s) => (
+          {[1, 2, 3, 4, 5].map((s) => (
             <Star
               key={s}
               className={`h-3 w-3 ${s <= 4 ? "text-amber-400 fill-amber-400" : "text-white/20"}`}
@@ -118,7 +121,9 @@ const ProductCard = ({ product, loading, onOpenDetails }) => {
             <p className="text-xl font-display font-black text-white">
               ₹{Number(productPrice || 0).toLocaleString()}
             </p>
-            <p className="text-[10px] text-white/30 mt-0.5">Free shipping over ₹999</p>
+            <p className="text-[10px] text-white/30 mt-0.5">
+              Free shipping over ₹999
+            </p>
           </div>
 
           <button

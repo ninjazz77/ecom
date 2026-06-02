@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: ekart-backend
+    name: flux-backend
     env: node
     rootDir: backend
     buildCommand: npm install

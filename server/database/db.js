@@ -9,7 +9,7 @@ const normalizeMongoUri = (uri) => {
   return trimmed.replace(/\/$/, "");
 };
 
-const ensureDatabaseName = (uri, databaseName = "Ekart-YT") => {
+const ensureDatabaseName = (uri, databaseName = "Flux-DB") => {
   const normalizedUri = normalizeMongoUri(uri);
   if (!normalizedUri) {
     return "";
@@ -31,7 +31,7 @@ const getCandidateUris = () => {
     process.env.MONGO_URI || process.env.MONGODB_URI || process.env.MONGO_URL,
   );
   const fallbackUri = ensureDatabaseName(
-    process.env.MONGO_FALLBACK_URI || "mongodb://127.0.0.1:27017/Ekart-YT",
+    process.env.MONGO_FALLBACK_URI || "mongodb://127.0.0.1:27017/Flux-DB",
   );
 
   return [...new Set([primaryUri, fallbackUri].filter(Boolean))];

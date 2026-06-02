@@ -40,7 +40,7 @@ const getMailFrom = () => {
       process.env.MAIL_FROM_NAME ||
       process.env.SMTP_FROM_NAME ||
       process.env.MAIL_FROM_NAME ||
-      "Ekart",
+      "Flux",
   );
 
   if (!fromAddress) {
@@ -64,7 +64,10 @@ const getTransportOptions = () => {
     secureEnv === undefined ? port === 465 : secureEnv.toLowerCase() === "true";
 
   console.log("=== SMTP CONFIGURATION ===");
-  console.log("SMTP_USER:", user ? `${user.substring(0, 5)}***@***` : "MISSING");
+  console.log(
+    "SMTP_USER:",
+    user ? `${user.substring(0, 5)}***@***` : "MISSING",
+  );
   console.log("SMTP_PASS:", pass ? "***configured***" : "MISSING");
   console.log("SMTP_HOST:", host || "(not set, using service)");
   console.log("SMTP_SERVICE:", service || "gmail (default)");
@@ -89,7 +92,7 @@ const getTransportOptions = () => {
         greetingTimeout: Number(process.env.SMTP_GREETING_TIMEOUT || 10000),
         socketTimeout: Number(process.env.SMTP_SOCKET_TIMEOUT || 10000),
         logger: false, // Set to true for even more debugging
-        debug: false,  // Set to true for SMTP protocol debugging
+        debug: false, // Set to true for SMTP protocol debugging
       }
     : {
         service: service || "gmail",
@@ -103,7 +106,10 @@ const getTransportOptions = () => {
 
   console.log("Transport config:", {
     ...config,
-    auth: { user: user ? `${user.substring(0, 5)}***` : "MISSING", pass: "***" },
+    auth: {
+      user: user ? `${user.substring(0, 5)}***` : "MISSING",
+      pass: "***",
+    },
   });
   console.log("=== END SMTP CONFIGURATION ===");
 

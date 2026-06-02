@@ -1,12 +1,12 @@
 /**
  * SMTP Email Test Script
- * 
+ *
  * This script tests your SMTP configuration by sending a test email.
  * Run it to verify your email settings are correct before deploying.
- * 
+ *
  * Usage:
  *   node test-email.js your-test-email@gmail.com
- * 
+ *
  * Or edit the TEST_RECIPIENT below and run:
  *   node test-email.js
  */
@@ -18,7 +18,7 @@ import nodemailer from "nodemailer";
 const TEST_RECIPIENT = process.argv[2] || "your-email@example.com";
 
 console.log("=".repeat(60));
-console.log("EKART EMAIL CONFIGURATION TEST");
+console.log("FLUX EMAIL CONFIGURATION TEST");
 console.log("=".repeat(60));
 console.log();
 
@@ -28,12 +28,12 @@ console.log("-".repeat(60));
 
 const checkEnvVar = (name, value) => {
   const exists = value ? "✅" : "❌";
-  const display = value 
-    ? (name.includes("PASS") || name.includes("SECRET") 
-        ? "***configured***" 
-        : value.length > 30 
-          ? `${value.substring(0, 27)}...` 
-          : value)
+  const display = value
+    ? name.includes("PASS") || name.includes("SECRET")
+      ? "***configured***"
+      : value.length > 30
+        ? `${value.substring(0, 27)}...`
+        : value
     : "NOT SET";
   console.log(`${exists} ${name.padEnd(25)} = ${display}`);
   return !!value;
@@ -115,12 +115,16 @@ try {
   console.error();
   console.error("Common issues:");
   console.error("  • EAUTH: Wrong email or password");
-  console.error("  • ESOCKET: Cannot connect to server (firewall/network issue)");
+  console.error(
+    "  • ESOCKET: Cannot connect to server (firewall/network issue)",
+  );
   console.error("  • ETIMEDOUT: Server not responding");
   console.error();
   console.error("For Gmail:");
   console.error("  1. Enable 2-Factor Authentication");
-  console.error("  2. Generate App Password: https://myaccount.google.com/apppasswords");
+  console.error(
+    "  2. Generate App Password: https://myaccount.google.com/apppasswords",
+  );
   console.error("  3. Use App Password (not regular password) in SMTP_PASS");
   console.error();
   process.exit(1);
@@ -144,15 +148,15 @@ if (TEST_RECIPIENT === "your-email@example.com") {
 }
 
 const fromAddress = process.env.EMAIL_FROM || user;
-const fromName = process.env.EMAIL_FROM_NAME || "Ekart";
+const fromName = process.env.EMAIL_FROM_NAME || "Flux";
 const from = fromName ? `${fromName} <${fromAddress}>` : fromAddress;
 
 const mailOptions = {
   from,
   to: TEST_RECIPIENT,
-  subject: "✅ Ekart Email Test - Success!",
+  subject: "✅ Flux Email Test - Success!",
   text: `
-This is a test email from your Ekart application.
+This is a test email from your Flux application.
 
 If you received this email, your SMTP configuration is working correctly!
 
@@ -167,7 +171,7 @@ You can now deploy your application with confidence.
     <div style="font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5;">
       <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
         <h2 style="color: #22c55e; margin-top: 0;">✅ Email Test Successful!</h2>
-        <p>This is a test email from your <strong>Ekart</strong> application.</p>
+        <p>This is a test email from your <strong>Flux</strong> application.</p>
         <p>If you received this email, your SMTP configuration is working correctly!</p>
         <div style="background: #f9fafb; padding: 15px; border-radius: 5px; margin: 20px 0;">
           <p style="margin: 5px 0;"><strong>Service:</strong> ${service || host}</p>

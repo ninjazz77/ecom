@@ -1,15 +1,15 @@
 /**
  * Email Configuration Diagnostic Tool
- * 
+ *
  * This script diagnoses email configuration issues and provides specific fixes.
- * 
+ *
  * Usage: node diagnose-email.js
  */
 
 import "dotenv/config";
 
 console.log("=".repeat(70));
-console.log("EKART EMAIL DIAGNOSTIC TOOL");
+console.log("FLUX EMAIL DIAGNOSTIC TOOL");
 console.log("=".repeat(70));
 console.log();
 
@@ -61,21 +61,21 @@ checkCritical(
   smtpUser,
   "SMTP_USER",
   smtpUser,
-  "Set SMTP_USER=your-email@gmail.com in .env"
+  "Set SMTP_USER=your-email@gmail.com in .env",
 );
 
 checkCritical(
   smtpPass,
   "SMTP_PASS",
   smtpPass ? "***configured***" : "NOT SET",
-  "Set SMTP_PASS=your-gmail-app-password in .env"
+  "Set SMTP_PASS=your-gmail-app-password in .env",
 );
 
 checkCritical(
   emailFrom,
   "EMAIL_FROM",
   emailFrom,
-  "Set EMAIL_FROM=your-email@gmail.com in .env"
+  "Set EMAIL_FROM=your-email@gmail.com in .env",
 );
 
 printSection("2. EMAIL FORMAT VALIDATION");
@@ -86,14 +86,14 @@ if (smtpUser) {
     emailRegex.test(smtpUser),
     "SMTP_USER format",
     "Email format appears invalid",
-    "Use format: user@domain.com"
+    "Use format: user@domain.com",
   );
-  
+
   checkWarning(
     smtpUser === emailFrom,
     "Email consistency",
     "SMTP_USER and EMAIL_FROM don't match",
-    "Set both to the same email address"
+    "Set both to the same email address",
   );
 }
 
@@ -105,22 +105,24 @@ if (smtpPass) {
     !hasSpaces,
     "Password format",
     "Password contains spaces",
-    "Remove all spaces: 'abcd abcd abcd abcd' → 'abcdabcdabcdabcd'"
+    "Remove all spaces: 'abcd abcd abcd abcd' → 'abcdabcdabcdabcd'",
   );
-  
+
   const length = smtpPass.replace(/\s/g, "").length;
   checkWarning(
     length === 16,
     "Password length",
     `Password length is ${length} (should be 16)`,
-    "Gmail App Passwords are always 16 characters"
+    "Gmail App Passwords are always 16 characters",
   );
-  
+
   // Check if it looks like the invalid password from testing
   if (smtpPass.replace(/\s/g, "") === "yyqwooambqcjzdhu") {
     console.log("⚠️  DETECTED: This is the INVALID password from testing");
     console.log("   This password was rejected by Gmail");
-    console.log("   Generate a new one at: https://myaccount.google.com/apppasswords");
+    console.log(
+      "   Generate a new one at: https://myaccount.google.com/apppasswords",
+    );
     issuesFound++;
   }
 }
@@ -137,19 +139,19 @@ if (smtpHost) {
     smtpPort,
     "SMTP_PORT",
     "Using custom host but port not specified",
-    "Set SMTP_PORT=587 (or 465 for SSL)"
+    "Set SMTP_PORT=587 (or 465 for SSL)",
   );
 } else {
   const service = smtpService || "gmail";
   console.log(`✅ Using SMTP service: ${service}`);
-  
+
   if (service.toLowerCase() === "gmail" && smtpUser) {
     const isGmailAddress = smtpUser.toLowerCase().endsWith("@gmail.com");
     checkWarning(
       isGmailAddress,
       "Gmail service match",
       "Using gmail service but email is not @gmail.com",
-      "Either use @gmail.com email or set SMTP_HOST for custom domain"
+      "Either use @gmail.com email or set SMTP_HOST for custom domain",
     );
   }
 }
@@ -161,7 +163,7 @@ checkWarning(
   clientUrl,
   "CLIENT_URL",
   "Frontend URL not set",
-  "Set CLIENT_URL=https://your-vercel-app.vercel.app"
+  "Set CLIENT_URL=https://your-vercel-app.vercel.app",
 );
 
 const nodeEnv = process.env.NODE_ENV;
@@ -176,7 +178,9 @@ console.log("  2. ✅ App Password GENERATED");
 console.log("  3. ✅ App Password WITHOUT SPACES");
 console.log();
 console.log("Check your Gmail settings:");
-console.log("  • 2FA: https://myaccount.google.com/signinoptions/two-step-verification");
+console.log(
+  "  • 2FA: https://myaccount.google.com/signinoptions/two-step-verification",
+);
 console.log("  • App Passwords: https://myaccount.google.com/apppasswords");
 console.log();
 
@@ -187,7 +191,7 @@ if (smtpUser && smtpUser.includes("@gmail.com")) {
   console.log("  1. Go to: https://myaccount.google.com/apppasswords");
   console.log("  2. Select app: Mail");
   console.log("  3. Select device: Other (Custom name)");
-  console.log("  4. Name: Ekart Backend");
+  console.log("  4. Name: Flux Backend");
   console.log("  5. Click GENERATE");
   console.log("  6. Copy the 16-character password");
   console.log("  7. Remove all spaces");
@@ -208,11 +212,15 @@ if (issuesFound === 0) {
   console.log("✅ NO ISSUES FOUND");
   console.log();
   console.log("Your configuration looks good!");
-  console.log("If emails still fail, run: node test-email.js your-email@gmail.com");
+  console.log(
+    "If emails still fail, run: node test-email.js your-email@gmail.com",
+  );
   console.log();
 } else if (criticalIssues === 0) {
   console.log(`⚠️  ${issuesFound} WARNING(S) FOUND`);
-  console.log("   Your email system might work, but there are potential issues.");
+  console.log(
+    "   Your email system might work, but there are potential issues.",
+  );
   console.log();
 } else {
   console.log(`Total issues: ${issuesFound} (${criticalIssues} critical)`);

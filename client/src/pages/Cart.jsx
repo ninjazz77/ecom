@@ -1,17 +1,26 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "@/lib/api";
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Tag, Zap, Package } from "lucide-react";
+import {
+  Minus,
+  Plus,
+  Trash2,
+  ShoppingBag,
+  ArrowRight,
+  Tag,
+  Zap,
+  Package,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useDispatch } from "react-redux";
 import { setCart } from "@/redux/productsSlice";
 
 const Cart = () => {
-  const [cart, setCartState]           = useState(null);
-  const [loading, setLoading]          = useState(true);
-  const [busyId, setBusyId]            = useState("");
+  const [cart, setCartState] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [busyId, setBusyId] = useState("");
   const [shippingAddress, setShippingAddress] = useState("");
-  const [couponCode, setCouponCode]    = useState("");
+  const [couponCode, setCouponCode] = useState("");
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const dispatch = useDispatch();
 
@@ -23,10 +32,16 @@ const Cart = () => {
         setCartState(res.data.cart);
         dispatch(setCart(res.data.cart));
       }
-    } catch { toast.error("Failed to load cart"); } finally { setLoading(false); }
+    } catch {
+      toast.error("Failed to load cart");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  useEffect(() => { fetchCart(); }, []);
+  useEffect(() => {
+    fetchCart();
+  }, []);
 
   const updateQty = async (productId, type) => {
     try {
@@ -36,7 +51,11 @@ const Cart = () => {
         setCartState(res.data.cart);
         dispatch(setCart(res.data.cart));
       }
-    } catch { toast.error("Unable to update cart"); } finally { setBusyId(""); }
+    } catch {
+      toast.error("Unable to update cart");
+    } finally {
+      setBusyId("");
+    }
   };
 
   const removeItem = async (productId) => {
@@ -48,11 +67,18 @@ const Cart = () => {
         dispatch(setCart(res.data.cart));
         toast.success("Item removed");
       }
-    } catch { toast.error("Unable to remove item"); } finally { setBusyId(""); }
+    } catch {
+      toast.error("Unable to remove item");
+    } finally {
+      setBusyId("");
+    }
   };
 
   const handleCheckout = async () => {
-    if (!shippingAddress.trim()) { toast.error("Enter a shipping address"); return; }
+    if (!shippingAddress.trim()) {
+      toast.error("Enter a shipping address");
+      return;
+    }
     try {
       setCheckoutLoading(true);
       const res = await api.post("/order/checkout", { shippingAddress });
@@ -65,7 +91,9 @@ const Cart = () => {
       }
     } catch (e) {
       toast.error(e.response?.data?.message || "Checkout failed");
-    } finally { setCheckoutLoading(false); }
+    } finally {
+      setCheckoutLoading(false);
+    }
   };
 
   const items = cart?.items || [];
@@ -101,8 +129,12 @@ const Cart = () => {
               <ShoppingBag className="h-10 w-10 text-violet-400" />
             </div>
             <div className="text-center">
-              <h2 className="font-display text-3xl text-white">Your cart is empty</h2>
-              <p className="mt-2 text-white/40">Start shopping to add items here</p>
+              <h2 className="font-display text-3xl text-white">
+                Your cart is empty
+              </h2>
+              <p className="mt-2 text-white/40">
+                Start shopping to add items here
+              </p>
             </div>
             <Link to="/products" className="btn-glow">
               Browse Products <ArrowRight className="h-4 w-4" />
@@ -113,24 +145,34 @@ const Cart = () => {
             {/* Items */}
             <div className="space-y-4">
               {items.map((item) => {
-                const pid    = item.productId?._id || item.productId;
-                const name   = item.productId?.productName || "Product";
-                const img    = item.productId?.productImg?.[0]?.url || "/Ekart.png";
-                const price  = Number(item.productId?.productPrice || item.price || 0);
-                const cat    = item.productId?.category || "";
+                const pid = item.productId?._id || item.productId;
+                const name = item.productId?.productName || "Product";
+                const img = item.productId?.productImg?.[0]?.url || "/Flux.png";
+                const price = Number(
+                  item.productId?.productPrice || item.price || 0,
+                );
+                const cat = item.productId?.category || "";
                 const isBusy = busyId.startsWith(String(pid));
 
                 return (
                   <div key={item._id} className="glass-card p-5 flex gap-5">
                     {/* Image */}
                     <div className="h-24 w-24 flex-shrink-0 rounded-2xl overflow-hidden bg-white/4">
-                      <img src={img} alt={name} className="w-full h-full object-cover" />
+                      <img
+                        src={img}
+                        alt={name}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">
-                      <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">{cat}</p>
-                      <h3 className="font-semibold text-white mt-0.5 truncate">{name}</h3>
+                      <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">
+                        {cat}
+                      </p>
+                      <h3 className="font-semibold text-white mt-0.5 truncate">
+                        {name}
+                      </h3>
                       <p className="mt-1 font-display text-lg font-black gradient-text">
                         ₹{price.toLocaleString()}
                       </p>
@@ -182,7 +224,9 @@ const Cart = () => {
               <div className="glass rounded-3xl p-5">
                 <div className="flex items-center gap-2 mb-4">
                   <Tag className="h-4 w-4 text-amber-400" />
-                  <p className="text-sm font-semibold text-white">Coupon Code</p>
+                  <p className="text-sm font-semibold text-white">
+                    Coupon Code
+                  </p>
                 </div>
                 <div className="flex gap-2">
                   <input
@@ -202,23 +246,32 @@ const Cart = () => {
 
               {/* Summary */}
               <div className="glass rounded-3xl p-5 space-y-4">
-                <p className="font-display text-white text-lg font-bold">Order Summary</p>
+                <p className="font-display text-white text-lg font-bold">
+                  Order Summary
+                </p>
 
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between text-white/50">
                     <span>Subtotal ({items.length} items)</span>
-                    <span className="text-white">₹{total.toLocaleString()}</span>
+                    <span className="text-white">
+                      ₹{total.toLocaleString()}
+                    </span>
                   </div>
                   <div className="flex justify-between text-white/50">
                     <span>Shipping</span>
-                    <span className={shipping === 0 ? "text-green-400" : "text-white"}>
+                    <span
+                      className={
+                        shipping === 0 ? "text-green-400" : "text-white"
+                      }
+                    >
                       {shipping === 0 ? "Free" : `₹${shipping}`}
                     </span>
                   </div>
                   {shipping > 0 && (
                     <p className="text-[11px] text-amber-400 flex items-center gap-1">
                       <Zap className="h-3 w-3" />
-                      Add ₹{(999 - total).toLocaleString()} more for free shipping
+                      Add ₹{(999 - total).toLocaleString()} more for free
+                      shipping
                     </p>
                   )}
                   <div className="border-t border-white/8 pt-3 flex justify-between font-semibold text-white text-base">
@@ -258,13 +311,18 @@ const Cart = () => {
                 <div className="grid grid-cols-3 gap-2 pt-1">
                   {["Secure Pay", "Easy Returns", "24/7 Support"].map((t) => (
                     <div key={t} className="text-center">
-                      <p className="text-[10px] text-white/30 leading-snug">{t}</p>
+                      <p className="text-[10px] text-white/30 leading-snug">
+                        {t}
+                      </p>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <Link to="/products" className="btn-ghost w-full justify-center text-sm">
+              <Link
+                to="/products"
+                className="btn-ghost w-full justify-center text-sm"
+              >
                 Continue Shopping
               </Link>
             </div>

@@ -1,5 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { X, ShoppingCart, Heart, Star, Zap, CheckCircle2, Package, Truck, Shield, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  X,
+  ShoppingCart,
+  Heart,
+  Star,
+  Zap,
+  CheckCircle2,
+  Package,
+  Truck,
+  Shield,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useDispatch } from "react-redux";
 import { setCart } from "@/redux/productsSlice";
@@ -13,7 +25,9 @@ const ProductDetailsModal = ({ product, onClose }) => {
   const [qty, setQty] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
 
-  const images = product?.productImg?.length ? product.productImg : [{ url: "/Ekart.png" }];
+  const images = product?.productImg?.length
+    ? product.productImg
+    : [{ url: "/Flux.png" }];
   const price = Number(product?.productPrice || 0);
   const stock = Number(product?.stock || 0);
   const canPurchase = product?.isActive !== false && stock > 0;
@@ -21,18 +35,23 @@ const ProductDetailsModal = ({ product, onClose }) => {
   // Lock scroll
   useEffect(() => {
     document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, []);
 
   // Keyboard close
   useEffect(() => {
-    const handler = (e) => { if (e.key === "Escape") onClose(); };
+    const handler = (e) => {
+      if (e.key === "Escape") onClose();
+    };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [onClose]);
 
   const nextImg = () => setActiveImg((p) => (p + 1) % images.length);
-  const prevImg = () => setActiveImg((p) => (p - 1 + images.length) % images.length);
+  const prevImg = () =>
+    setActiveImg((p) => (p - 1 + images.length) % images.length);
 
   const addToCart = async () => {
     const token = localStorage.getItem("accessToken");
@@ -43,7 +62,10 @@ const ProductDetailsModal = ({ product, onClose }) => {
     }
     try {
       setAddingToCart(true);
-      const res = await api.post("/cart/add", { productId: product._id, quantity: qty });
+      const res = await api.post("/cart/add", {
+        productId: product._id,
+        quantity: qty,
+      });
       if (res.data.success) {
         toast.success(`Added ${qty} item${qty > 1 ? "s" : ""} to cart ✨`);
         dispatch(setCart(res.data.cart));
@@ -56,9 +78,9 @@ const ProductDetailsModal = ({ product, onClose }) => {
   };
 
   const PERKS = [
-    { icon: Truck,       text: "Free delivery on orders over ₹999" },
-    { icon: Shield,      text: "Secure & encrypted checkout" },
-    { icon: Package,     text: "Easy 30-day returns" },
+    { icon: Truck, text: "Free delivery on orders over ₹999" },
+    { icon: Shield, text: "Secure & encrypted checkout" },
+    { icon: Package, text: "Easy 30-day returns" },
     { icon: CheckCircle2, text: "Authentic & quality guaranteed" },
   ];
 
@@ -142,7 +164,11 @@ const ProductDetailsModal = ({ product, onClose }) => {
                       i === activeImg ? "border-violet-500" : "border-white/10"
                     }`}
                   >
-                    <img src={img.url} alt="" className="w-full h-full object-cover" />
+                    <img
+                      src={img.url}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
                   </button>
                 ))}
               </div>
@@ -153,7 +179,9 @@ const ProductDetailsModal = ({ product, onClose }) => {
           <div className="p-7 flex flex-col gap-5">
             {/* Category & brand */}
             <div className="flex items-center gap-2">
-              <span className="badge badge-cyan">{product?.category || "General"}</span>
+              <span className="badge badge-cyan">
+                {product?.category || "General"}
+              </span>
               {product?.brand && (
                 <span className="badge badge-slate">{product?.brand}</span>
               )}
@@ -166,13 +194,15 @@ const ProductDetailsModal = ({ product, onClose }) => {
 
               {/* Stars */}
               <div className="flex items-center gap-1.5 mt-3">
-                {[1,2,3,4,5].map((s) => (
+                {[1, 2, 3, 4, 5].map((s) => (
                   <Star
                     key={s}
                     className={`h-4 w-4 ${s <= 4 ? "text-amber-400 fill-amber-400" : "text-white/15"}`}
                   />
                 ))}
-                <span className="text-sm text-white/40 ml-1">4.0 (48 reviews)</span>
+                <span className="text-sm text-white/40 ml-1">
+                  4.0 (48 reviews)
+                </span>
               </div>
             </div>
 
@@ -202,7 +232,9 @@ const ProductDetailsModal = ({ product, onClose }) => {
             {/* Description */}
             {product?.productDesc && (
               <div className="glass rounded-2xl p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-white/30 mb-2">Description</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-white/30 mb-2">
+                  Description
+                </p>
                 <p className="text-sm text-white/60 leading-relaxed line-clamp-4">
                   {product.productDesc}
                 </p>
@@ -219,7 +251,9 @@ const ProductDetailsModal = ({ product, onClose }) => {
                   >
                     −
                   </button>
-                  <span className="w-8 text-center text-white font-semibold">{qty}</span>
+                  <span className="w-8 text-center text-white font-semibold">
+                    {qty}
+                  </span>
                   <button
                     onClick={() => setQty((q) => Math.min(stock, q + 1))}
                     className="h-7 w-7 rounded-xl bg-white/8 flex items-center justify-center text-white hover:bg-white/15 transition text-lg font-bold"

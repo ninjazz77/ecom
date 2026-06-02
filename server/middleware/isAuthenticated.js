@@ -2,7 +2,7 @@ import User from "../models/userModel.js";
 
 import jwt from "jsonwebtoken";
 
-const jwtSecret = process.env.SECRET_KEY || "ekart-dev-secret";
+const jwtSecret = process.env.SECRET_KEY || "flux-dev-secret";
 
 export const isAuthenticated = async (req, res, next) => {
   try {

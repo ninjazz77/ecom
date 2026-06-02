@@ -75,7 +75,7 @@ app.get("/health", (_, res) => {
 app.get("/", (_, res) => {
   res.status(200).json({
     success: true,
-    message: "Ekart API is running",
+    message: "Flux API is running",
     docs: "/health",
   });
 });
