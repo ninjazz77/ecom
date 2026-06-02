@@ -89,6 +89,7 @@ export const register = async (req, res) => {
     await newUser.save();
 
     try {
+      console.log("Attempting to send verification email to:", normalizedEmail);
       const mailResult = await verifyEmail(
         token,
         normalizedEmail,
@@ -97,13 +98,30 @@ export const register = async (req, res) => {
       if (!mailResult?.success) {
         throw new Error("Verification email could not be sent");
       }
-      console.log("Verification email sent successfully to:", normalizedEmail);
+      console.log("✅ Verification email sent successfully to:", normalizedEmail);
     } catch (mailErr) {
-      console.error("verifyEmail error:", mailErr?.message || mailErr);
+      console.error("❌ verifyEmail error:", mailErr?.message || mailErr);
+      console.error("Full error details:", {
+        message: mailErr.message,
+        code: mailErr.code,
+        command: mailErr.command,
+        stack: mailErr.stack?.split('\n').slice(0, 3).join('\n'),
+      });
+      
+      // Provide more specific error message to user
+      let userMessage = "Account created, but the verification email could not be delivered. Please use resend verification.";
+      
+      if (mailErr.message?.includes("Authentication failed") || mailErr.code === "EAUTH") {
+        userMessage = "Account created, but email service authentication failed. Please contact support or use resend verification.";
+      } else if (mailErr.message?.includes("connect") || mailErr.code === "ESOCKET") {
+        userMessage = "Account created, but cannot connect to email server. Please use resend verification.";
+      } else if (mailErr.message?.includes("timeout") || mailErr.code === "ETIMEDOUT") {
+        userMessage = "Account created, but email server connection timed out. Please use resend verification.";
+      }
+      
       return res.status(201).json({
         success: true,
-        message:
-          "Account created, but the verification email could not be delivered. Please use resend verification.",
+        message: userMessage,
         user: {
           id: newUser._id,
           firstName: newUser.firstName,
@@ -114,6 +132,7 @@ export const register = async (req, res) => {
           isVerified: newUser.isVerified || false,
         },
         verificationEmailSent: false,
+        errorDetails: process.env.NODE_ENV === 'development' ? mailErr.message : undefined,
       });
     }
 

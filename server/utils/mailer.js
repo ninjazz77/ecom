@@ -63,31 +63,51 @@ const getTransportOptions = () => {
   const secure =
     secureEnv === undefined ? port === 465 : secureEnv.toLowerCase() === "true";
 
+  console.log("=== SMTP CONFIGURATION ===");
+  console.log("SMTP_USER:", user ? `${user.substring(0, 5)}***@***` : "MISSING");
+  console.log("SMTP_PASS:", pass ? "***configured***" : "MISSING");
+  console.log("SMTP_HOST:", host || "(not set, using service)");
+  console.log("SMTP_SERVICE:", service || "gmail (default)");
+  console.log("SMTP_PORT:", port);
+  console.log("SMTP_SECURE:", secure);
+
   if (!user || !pass) {
-    throw new Error(
+    const error = new Error(
       "Email service is not configured. Set SMTP_USER/SMTP_PASS, MAIL_USER/MAIL_PASS, or equivalent mail credentials.",
     );
+    console.error("❌ SMTP CONFIGURATION ERROR:", error.message);
+    throw error;
   }
 
-  if (host) {
-    return {
-      host,
-      port,
-      secure,
-      auth: { user, pass },
-      connectionTimeout: Number(process.env.SMTP_CONNECTION_TIMEOUT || 10000),
-      greetingTimeout: Number(process.env.SMTP_GREETING_TIMEOUT || 10000),
-      socketTimeout: Number(process.env.SMTP_SOCKET_TIMEOUT || 10000),
-    };
-  }
+  const config = host
+    ? {
+        host,
+        port,
+        secure,
+        auth: { user, pass },
+        connectionTimeout: Number(process.env.SMTP_CONNECTION_TIMEOUT || 10000),
+        greetingTimeout: Number(process.env.SMTP_GREETING_TIMEOUT || 10000),
+        socketTimeout: Number(process.env.SMTP_SOCKET_TIMEOUT || 10000),
+        logger: false, // Set to true for even more debugging
+        debug: false,  // Set to true for SMTP protocol debugging
+      }
+    : {
+        service: service || "gmail",
+        auth: { user, pass },
+        connectionTimeout: Number(process.env.SMTP_CONNECTION_TIMEOUT || 10000),
+        greetingTimeout: Number(process.env.SMTP_GREETING_TIMEOUT || 10000),
+        socketTimeout: Number(process.env.SMTP_SOCKET_TIMEOUT || 10000),
+        logger: false,
+        debug: false,
+      };
 
-  return {
-    service: service || "gmail",
-    auth: { user, pass },
-    connectionTimeout: Number(process.env.SMTP_CONNECTION_TIMEOUT || 10000),
-    greetingTimeout: Number(process.env.SMTP_GREETING_TIMEOUT || 10000),
-    socketTimeout: Number(process.env.SMTP_SOCKET_TIMEOUT || 10000),
-  };
+  console.log("Transport config:", {
+    ...config,
+    auth: { user: user ? `${user.substring(0, 5)}***` : "MISSING", pass: "***" },
+  });
+  console.log("=== END SMTP CONFIGURATION ===");
+
+  return config;
 };
 
 export const createMailTransport = () =>
