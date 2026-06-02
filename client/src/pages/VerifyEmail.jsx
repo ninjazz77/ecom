@@ -8,10 +8,17 @@ const VerifyEmail = () => {
   const navigate = useNavigate();
 
   const verifyEmail = async () => {
+    if (!token) {
+      setStatus(
+        "❌ Verification token is missing. Please use the link from your email.",
+      );
+      return;
+    }
+
     try {
       const res = await api.post(
         "/user/verify",
-        {},
+        { token },
         {
           headers: { Authorization: `Bearer ${token}` },
         },

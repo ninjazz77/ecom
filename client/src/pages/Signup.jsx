@@ -10,7 +10,14 @@ import {
 } from "@/components/card";
 import { Input } from "@/components/input";
 import { Label } from "@/components/label";
-import { Eye, EyeOff, Loader2, ShieldCheck, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  Eye,
+  EyeOff,
+  Loader2,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import api, { getApiErrorMessage } from "@/lib/api";

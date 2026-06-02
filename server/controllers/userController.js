@@ -16,6 +16,9 @@ const normalizeEmail = (value) =>
 
 const normalizeName = (value) => String(value || "").trim();
 
+const isValidEmail = (value) =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || "").trim());
+
 const escapeRegExp = (value) =>
   String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -39,6 +42,20 @@ export const register = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "All fields are required",
+      });
+    }
+
+    if (!isValidEmail(normalizedEmail)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid email address",
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters long",
       });
     }
 
@@ -132,14 +149,20 @@ export const register = async (req, res) => {
 export const verify = async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    const tokenFromHeader =
+      authHeader && authHeader.startsWith("Bearer ")
+        ? authHeader.split(" ")[1]
+        : null;
+    const token = tokenFromHeader || req.body.token || req.query.token;
+
+    if (!token) {
       return res.status(400).json({
         success: false,
-        message: "Authorization token missing or invalid",
+        message:
+          "Verification token is missing. Please use the link provided in your email or request a new verification email.",
       });
     }
 
-    const token = authHeader.split(" ")[1];
     let decoded;
     try {
       decoded = jwt.verify(token, jwtSecret);
@@ -147,7 +170,8 @@ export const verify = async (req, res) => {
       if (error.name === "TokenExpiredError") {
         return res.status(400).json({
           success: false,
-          message: "The registration token has expired",
+          message:
+            "The verification token has expired. Please request a new verification email.",
         });
       }
       return res.status(400).json({
@@ -161,6 +185,13 @@ export const verify = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: "User not found",
+      });
+    }
+
+    if (user.isVerified) {
+      return res.status(200).json({
+        success: true,
+        message: "Email is already verified",
       });
     }
 
