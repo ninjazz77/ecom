@@ -1,216 +1,167 @@
 import React, { useState } from "react";
-import { Button } from "@/components/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/card";
-import { Input } from "@/components/input";
-import { Label } from "@/components/label";
-import {
-  ArrowRight,
-  Eye,
-  EyeOff,
-  Loader2,
-  ShieldCheck,
-  Sparkles,
-} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { Eye, EyeOff, Zap, Sparkles, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import api, { getApiErrorMessage } from "@/lib/api";
 
 const Signup = () => {
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPw, setShowPw]   = useState(false);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-  });
+  const [form, setForm]       = useState({ firstName: "", lastName: "", email: "", password: "" });
+  const navigate              = useNavigate();
 
-  const navigate = useNavigate();
+  const onChange = (e) => setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const submitHandler = async (e) => {
+  const submit = async (e) => {
     e.preventDefault();
+    
+    // Client-side validation
+    if (!form.firstName.trim() || !form.lastName.trim()) {
+      toast.error("Please enter your full name");
+      return;
+    }
+    if (!form.email.trim()) {
+      toast.error("Please enter your email address");
+      return;
+    }
+    if (form.password.length < 6) {
+      toast.error("Password must be at least 6 characters long");
+      return;
+    }
+    
     try {
       setLoading(true);
-      const res = await api.post("/user/register", formData);
+      const res = await api.post("/user/register", form);
       if (res.data.success) {
-        localStorage.setItem("pendingVerificationEmail", formData.email);
+        localStorage.setItem("pendingVerificationEmail", form.email);
+        toast.success(res.data.message || "Account created! Check your email.");
         navigate("/verify");
-        toast.success(res.data.message);
       }
-    } catch (error) {
-      toast.error(getApiErrorMessage(error, "Signup failed"));
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) {
+      const errorMessage = getApiErrorMessage(err, "Signup failed");
+      toast.error(errorMessage);
+      console.error("Signup error:", err.response?.data || err.message);
+    } finally { setLoading(false); }
   };
+
+  const PERKS = [
+    "Personalized recommendations",
+    "Order history & tracking",
+    "Exclusive member deals",
+    "Faster checkout every time",
+  ];
+
   return (
-    <div className="min-h-screen bg-slate-950 px-4 py-8 lg:px-8 text-white">
-      <div className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-7xl items-center gap-8 lg:grid-cols-[0.95fr_1.05fr]">
-        <div className="rounded-[2rem] border border-slate-800/70 bg-slate-950/95 p-8 shadow-[0_30px_90px_rgba(0,0,0,0.35)]">
-          <div className="brand-pill w-fit text-cyan-300 shadow-[0_10px_30px_rgba(56,189,248,0.16)]">
-            <Sparkles className="h-4 w-4" />
-            Join Flux
+    <div className="min-h-screen bg-bg text-white flex items-center justify-center px-4 py-20 relative overflow-hidden">
+      <div className="glow-orb w-96 h-96 bg-pink-600 -top-24 -right-24 opacity-20" />
+      <div className="glow-orb w-80 h-80 bg-cyan-600 -bottom-24 -left-24 opacity-15" />
+      <div
+        className="absolute inset-0 opacity-[0.025]"
+        style={{
+          backgroundImage: "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)",
+          backgroundSize: "48px 48px",
+        }}
+      />
+
+      <div className="relative z-10 w-full max-w-4xl grid lg:grid-cols-2 gap-8 items-center">
+        {/* Left */}
+        <div className="hidden lg:flex flex-col gap-8 animate-fade-up">
+          <Link to="/" className="flex items-center gap-3">
+            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center">
+              <Zap className="h-6 w-6 text-white" fill="white" />
+            </div>
+            <span className="font-display text-2xl font-black text-white">Flux.</span>
+          </Link>
+
+          <div>
+            <span className="badge badge-pink mb-4">
+              <Sparkles className="h-3 w-3" /> Join Flux
+            </span>
+            <h1 className="font-display text-5xl text-white leading-tight">
+              Create your account today.
+            </h1>
+            <p className="mt-4 text-white/45 leading-relaxed">
+              Join millions of shoppers who trust Flux for premium products and a seamless experience.
+            </p>
           </div>
-          <h1 className="mt-5 text-4xl font-semibold leading-tight md:text-5xl">
-            Create an account that unlocks a cleaner, faster storefront
-            experience.
-          </h1>
-          <p className="mt-4 max-w-xl text-sm leading-7 text-slate-400">
-            Saved checkout details, order history, and future personalization
-            all start here.
-          </p>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            {[
-              [
-                ShieldCheck,
-                "Protected profile",
-                "Your account data stays secure",
-              ],
-              [
-                ArrowRight,
-                "Faster checkout",
-                "Repeat orders become effortless",
-              ],
-            ].map(([BenefitIcon, title, detail]) => (
-              <div
-                key={title}
-                className="rounded-2xl border border-slate-800/70 bg-slate-900/80 p-5"
-              >
-                {React.createElement(BenefitIcon, {
-                  className: "h-5 w-5 text-cyan-300",
-                })}
-                <p className="mt-3 text-sm font-semibold text-white">{title}</p>
-                <p className="mt-1 text-sm text-slate-400">{detail}</p>
+
+          <div className="space-y-3">
+            {PERKS.map((perk) => (
+              <div key={perk} className="flex items-center gap-3 text-sm text-white/60">
+                <span className="h-5 w-5 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+                  <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </span>
+                {perk}
               </div>
             ))}
           </div>
         </div>
 
-        <Card className="w-full rounded-[2rem] border border-slate-800/70 bg-slate-900/90 shadow-[0_30px_90px_rgba(0,0,0,0.35)] backdrop-blur">
-          <CardHeader>
-            <CardTitle className="text-3xl text-white">
-              Create your account
-            </CardTitle>
-            <CardDescription className="text-slate-400">
-              Enter your details to get started.
-            </CardDescription>
-          </CardHeader>
+        {/* Right – form */}
+        <div className="glass-strong rounded-4xl p-8 animate-scale-in">
+          <Link to="/" className="flex items-center gap-3 mb-8 lg:hidden">
+            <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center">
+              <Zap className="h-5 w-5 text-white" fill="white" />
+            </div>
+            <span className="font-display text-xl font-black text-white">Flux.</span>
+          </Link>
 
-          <CardContent>
-            <form className="flex flex-col gap-4" onSubmit={submitHandler}>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="firstName" className="text-slate-200">
-                    First Name
-                  </Label>
-                  <Input
-                    id="firstName"
-                    name="firstName"
-                    type="text"
-                    placeholder="John"
-                    required
-                    value={formData.firstName}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="lastName" className="text-slate-200">
-                    Last Name
-                  </Label>
-                  <Input
-                    id="lastName"
-                    name="lastName"
-                    type="text"
-                    placeholder="Doe"
-                    required
-                    value={formData.lastName}
-                    onChange={handleChange}
-                  />
-                </div>
+          <h2 className="font-display text-3xl text-white">Create Account</h2>
+          <p className="text-sm text-white/40 mt-2">Fill in the details to get started</p>
+
+          <form onSubmit={submit} className="mt-8 space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold uppercase tracking-wider text-white/40">First Name</label>
+                <input name="firstName" type="text" required value={form.firstName} onChange={onChange}
+                  placeholder="John" className="input-dark w-full" />
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="email" className="text-slate-200">
-                  Email
-                </Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                />
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold uppercase tracking-wider text-white/40">Last Name</label>
+                <input name="lastName" type="text" required value={form.lastName} onChange={onChange}
+                  placeholder="Doe" className="input-dark w-full" />
               </div>
+            </div>
 
-              <div className="grid gap-2">
-                <Label htmlFor="password" className="text-slate-200">
-                  Password
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    name="password"
-                    placeholder="Create a password"
-                    type={showPassword ? "text" : "password"}
-                    required
-                    value={formData.password}
-                    onChange={handleChange}
-                  />
-                  {showPassword ? (
-                    <EyeOff
-                      onClick={() => setShowPassword(false)}
-                      className="absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 cursor-pointer text-slate-400"
-                    />
-                  ) : (
-                    <Eye
-                      onClick={() => setShowPassword(true)}
-                      className="absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 cursor-pointer text-slate-400"
-                    />
-                  )}
-                </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wider text-white/40">Email</label>
+              <input name="email" type="email" required value={form.email} onChange={onChange}
+                placeholder="you@example.com" className="input-dark w-full" />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wider text-white/40">Password</label>
+              <div className="relative">
+                <input name="password" type={showPw ? "text" : "password"} required value={form.password} onChange={onChange}
+                  placeholder="Create a password" className="input-dark w-full pr-12" />
+                <button type="button" onClick={() => setShowPw((p) => !p)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/70 transition">
+                  {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
+            </div>
 
-              <Button type="submit" className="w-full">
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Please wait...
-                  </>
-                ) : (
-                  "Signup"
-                )}
-              </Button>
-            </form>
-          </CardContent>
+            <button type="submit" disabled={loading} className="btn-glow w-full justify-center py-3.5 text-base disabled:opacity-50 mt-2">
+              {loading ? (
+                <>
+                  <span className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin" />
+                  Creating account…
+                </>
+              ) : (
+                <><UserPlus className="h-4 w-4" /> Create Account</>
+              )}
+            </button>
+          </form>
 
-          <CardFooter className="flex-col gap-3 text-slate-400">
-            <p className="text-sm text-slate-400">
-              Already have an account?{" "}
-              <Link
-                to="/login"
-                className="font-semibold text-cyan-300 underline underline-offset-4"
-              >
-                Login
-              </Link>
-            </p>
-          </CardFooter>
-        </Card>
+          <p className="mt-6 text-sm text-center text-white/35">
+            Already have an account?{" "}
+            <Link to="/login" className="text-violet-400 hover:text-violet-300 font-semibold transition">
+              Sign in
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

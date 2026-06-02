@@ -1,180 +1,150 @@
 import React, { useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  ArrowRight,
-  Eye,
-  EyeOff,
-  Loader2,
-  Shield,
-  ShieldCheck,
-  Sparkles,
-} from "lucide-react";
+import { Eye, EyeOff, Shield, LayoutDashboard, Zap } from "lucide-react";
 import { toast } from "sonner";
-
-import api, { getApiErrorMessage } from "@/lib/api";
 import { setUser } from "@/redux/userSlice";
-import { Button } from "@/components/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/card";
-import { Input } from "@/components/input";
-import { Label } from "@/components/label";
-import { Link } from "react-router-dom";
+import api, { getApiErrorMessage } from "@/lib/api";
 
 const AdminLogin = () => {
-  const { user } = useSelector((store) => store.user);
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
-  const [showPassword, setShowPassword] = useState(false);
+  const { user }      = useSelector((s) => s.user);
+  const dispatch      = useDispatch();
+  const navigate      = useNavigate();
+  const [showPw, setShowPw]   = useState(false);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [form, setForm]       = useState({ email: "", password: "" });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  if (user?.role === "admin") return <Navigate to="/admin" replace />;
 
-  const submitHandler = async (e) => {
+  const onChange = (e) => setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
+
+  const submit = async (e) => {
     e.preventDefault();
     try {
       setLoading(true);
-      const res = await api.post("/user/login", formData);
+      const res = await api.post("/user/login", form);
       if (res.data.success && res.data.user?.role === "admin") {
         dispatch(setUser(res.data.user));
         localStorage.setItem("accessToken", res.data.accessToken);
-        toast.success("Admin login successful");
+        toast.success("Admin access granted");
         navigate("/admin");
-        return;
+      } else {
+        toast.error("Admin access required");
       }
-
-      toast.error("Admin access required");
-    } catch (error) {
-      toast.error(getApiErrorMessage(error, "Admin login failed"));
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, "Login failed"));
+    } finally { setLoading(false); }
   };
 
-  if (user?.role === "admin") {
-    return <Navigate to="/admin" replace />;
-  }
-
   return (
-    <div className="min-h-screen px-4 py-8 lg:px-8">
-      <div className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-7xl items-center gap-8 lg:grid-cols-[1.05fr_0.95fr]">
-        <div className="rounded-[2rem] border border-white/70 bg-[linear-gradient(135deg,rgba(15,23,42,0.96),rgba(30,41,59,0.92))] p-8 text-white shadow-[0_30px_90px_rgba(15,23,42,0.18)]">
-          <div className="premium-chip w-fit border-white/10 bg-white/10 text-white/80">
-            <ShieldCheck className="h-4 w-4" />
-            Admin access
+    <div className="min-h-screen bg-bg text-white flex items-center justify-center px-4 py-20 relative overflow-hidden">
+      <div className="glow-orb w-96 h-96 bg-violet-800 -top-20 -left-20 opacity-25" />
+      <div className="glow-orb w-80 h-80 bg-pink-700 -bottom-20 right-0 opacity-15" />
+      <div
+        className="absolute inset-0 opacity-[0.025]"
+        style={{
+          backgroundImage: "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)",
+          backgroundSize: "48px 48px",
+        }}
+      />
+
+      <div className="relative z-10 w-full max-w-4xl grid lg:grid-cols-2 gap-8 items-center">
+        {/* Left */}
+        <div className="hidden lg:flex flex-col gap-8 animate-fade-up">
+          <Link to="/" className="flex items-center gap-3">
+            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center">
+              <Zap className="h-6 w-6 text-white" fill="white" />
+            </div>
+            <span className="font-display text-2xl font-black text-white">Flux.</span>
+          </Link>
+
+          <div>
+            <span className="badge badge-purple mb-4">
+              <Shield className="h-3 w-3" /> Restricted Access
+            </span>
+            <h1 className="font-display text-5xl text-white leading-tight">
+              Admin Control Center
+            </h1>
+            <p className="mt-4 text-white/45 leading-relaxed">
+              Manage products, orders, customers, coupons and more from a unified production dashboard.
+            </p>
           </div>
-          <h1 className="mt-5 text-4xl font-semibold leading-tight md:text-5xl">
-            Manage the platform with a calmer, more premium control room.
-          </h1>
-          <p className="mt-4 max-w-xl text-sm leading-7 text-white/70">
-            Orders, products, coupons, and content are easier to manage when the
-            interface feels structured and efficient.
-          </p>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2">
+
+          <div className="grid grid-cols-2 gap-4">
             {[
-              [Shield, "Secure access", "Restricted to admins only"],
-              [ArrowRight, "Faster workflows", "Clear actions and dashboards"],
-            ].map(([BenefitIcon, title, detail]) => (
-              <div
-                key={title}
-                className="rounded-2xl border border-white/10 bg-white/5 p-4"
-              >
-                {React.createElement(BenefitIcon, {
-                  className: "h-5 w-5 text-white/80",
-                })}
-                <p className="mt-3 text-sm font-semibold text-white">{title}</p>
-                <p className="mt-1 text-sm text-white/65">{detail}</p>
+              { icon: Shield,          title: "Role Protected",   text: "Admin-only access" },
+              { icon: LayoutDashboard, title: "Full Dashboard",   text: "12 management sections" },
+            ].map(({ icon: Icon, title, text }) => (
+              <div key={title} className="glass-card p-5">
+                <Icon className="h-5 w-5 text-violet-400 mb-3" />
+                <p className="font-semibold text-white text-sm">{title}</p>
+                <p className="text-xs text-white/40 mt-1">{text}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <Card className="w-full max-w-xl border-white/70 bg-white/90 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur">
-          <CardHeader>
-            <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-slate-950 px-3 py-1 text-xs font-medium uppercase tracking-[0.2em] text-white">
-              <Sparkles className="h-4 w-4" /> Admin access
+        {/* Right */}
+        <div className="glass-strong rounded-4xl p-8 animate-scale-in">
+          <Link to="/" className="flex items-center gap-3 mb-8 lg:hidden">
+            <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center">
+              <Zap className="h-5 w-5 text-white" fill="white" />
             </div>
-            <CardTitle className="text-3xl">Sign in to admin panel</CardTitle>
-            <CardDescription>
-              Use an administrator account to manage the platform.
-            </CardDescription>
-          </CardHeader>
+            <span className="font-display text-xl font-black text-white">Flux.</span>
+          </Link>
 
-          <CardContent className="space-y-4">
-            <div className="grid gap-2">
-              <Label htmlFor="email">Admin email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="admin@example.com"
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-violet-600 to-pink-600 flex items-center justify-center">
+              <Shield className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h2 className="font-display text-2xl text-white">Admin Sign In</h2>
+              <p className="text-xs text-white/35">Restricted to admin accounts only</p>
+            </div>
+          </div>
+
+          <form onSubmit={submit} className="space-y-5">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wider text-white/40">Admin Email</label>
+              <input
+                name="email" type="email" required value={form.email} onChange={onChange}
+                placeholder="admin@example.com" className="input-dark w-full"
               />
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wider text-white/40">Password</label>
               <div className="relative">
-                <Input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Enter password"
+                <input
+                  name="password" type={showPw ? "text" : "password"} required value={form.password} onChange={onChange}
+                  placeholder="••••••••" className="input-dark w-full pr-12"
                 />
-                {showPassword ? (
-                  <EyeOff
-                    onClick={() => setShowPassword(false)}
-                    className="absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 cursor-pointer text-slate-500"
-                  />
-                ) : (
-                  <Eye
-                    onClick={() => setShowPassword(true)}
-                    className="absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 cursor-pointer text-slate-500"
-                  />
-                )}
+                <button type="button" onClick={() => setShowPw((p) => !p)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/70 transition">
+                  {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
             </div>
-          </CardContent>
 
-          <CardFooter className="flex-col gap-3">
-            <Button
-              onClick={submitHandler}
-              className="w-full"
-              disabled={loading}
-            >
+            <button type="submit" disabled={loading} className="btn-glow w-full justify-center py-3.5 text-base disabled:opacity-50">
               {loading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Signing
-                  in...
+                  <span className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin" />
+                  Authenticating…
                 </>
               ) : (
-                "Login as admin"
+                <><Shield className="h-4 w-4" /> Enter Dashboard</>
               )}
-            </Button>
-            <p className="text-sm text-slate-600">
-              Need customer access instead?{" "}
-              <Link
-                to="/login"
-                className="font-semibold text-slate-950 underline underline-offset-4"
-              >
-                Use the regular login page
-              </Link>
-            </p>
-          </CardFooter>
-        </Card>
+            </button>
+          </form>
+
+          <p className="mt-6 text-sm text-center text-white/35">
+            Regular user?{" "}
+            <Link to="/login" className="text-violet-400 hover:text-violet-300 font-semibold transition">
+              Sign in here
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

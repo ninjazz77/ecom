@@ -97,6 +97,7 @@ export const register = async (req, res) => {
       if (!mailResult?.success) {
         throw new Error("Verification email could not be sent");
       }
+      console.log("Verification email sent successfully to:", normalizedEmail);
     } catch (mailErr) {
       console.error("verifyEmail error:", mailErr?.message || mailErr);
       return res.status(201).json({
@@ -155,6 +156,14 @@ export const verify = async (req, res) => {
         : null;
     const token = tokenFromHeader || req.body.token || req.query.token;
 
+    console.log("Verification attempt:", {
+      hasAuthHeader: !!authHeader,
+      hasTokenFromHeader: !!tokenFromHeader,
+      hasBodyToken: !!req.body.token,
+      hasQueryToken: !!req.query.token,
+      tokenLength: token?.length,
+    });
+
     if (!token) {
       return res.status(400).json({
         success: false,
@@ -166,7 +175,9 @@ export const verify = async (req, res) => {
     let decoded;
     try {
       decoded = jwt.verify(token, jwtSecret);
+      console.log("Token decoded successfully:", { userId: decoded.id });
     } catch (error) {
+      console.error("Token verification failed:", error.message);
       if (error.name === "TokenExpiredError") {
         return res.status(400).json({
           success: false,
@@ -182,20 +193,31 @@ export const verify = async (req, res) => {
 
     const user = await User.findById(decoded.id);
     if (!user) {
+      console.error("User not found for decoded ID:", decoded.id);
       return res.status(404).json({
         success: false,
         message: "User not found",
       });
     }
 
+    console.log("User found:", {
+      email: user.email,
+      isVerified: user.isVerified,
+      hasStoredToken: !!user.token,
+    });
+
     if (user.isVerified) {
       return res.status(200).json({
         success: true,
-        message: "Email is already verified",
+        message: "Email is already verified. You can login now.",
       });
     }
 
     if (!user.token || user.token !== token) {
+      console.error("Token mismatch:", {
+        hasStoredToken: !!user.token,
+        tokensMatch: user.token === token,
+      });
       return res.status(400).json({
         success: false,
         message:
@@ -207,15 +229,17 @@ export const verify = async (req, res) => {
     user.isVerified = true;
     await user.save();
 
+    console.log("User verified successfully:", user.email);
+
     return res.status(200).json({
       success: true,
-      message: "Email verified successfully",
+      message: "Email verified successfully! You can now login.",
     });
   } catch (error) {
     console.error("verify error:", error);
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "An error occurred during verification. Please try again.",
     });
   }
 };
@@ -229,6 +253,8 @@ export const reVerify = async (req, res) => {
     const requestOrigin = req.headers.origin;
     const normalizedEmail = normalizeEmail(email);
 
+    console.log("Resend verification request for:", normalizedEmail);
+
     if (!normalizedEmail) {
       return res.status(400).json({
         success: false,
@@ -240,9 +266,18 @@ export const reVerify = async (req, res) => {
       email: new RegExp(`^${escapeRegExp(normalizedEmail)}$`, "i"),
     });
     if (!user) {
+      console.log("User not found for resend verification:", normalizedEmail);
       return res.status(404).json({
         success: false,
-        message: "User not found",
+        message: "No account found with this email address",
+      });
+    }
+
+    if (user.isVerified) {
+      console.log("User already verified:", normalizedEmail);
+      return res.status(200).json({
+        success: true,
+        message: "Email is already verified. You can login now.",
       });
     }
 
@@ -254,34 +289,27 @@ export const reVerify = async (req, res) => {
     await user.save();
 
     try {
-      const mailResult = await verifyEmail(
-        token,
-        normalizedEmail,
-        requestOrigin,
-      );
+      const mailResult = await verifyEmail(token, normalizedEmail, requestOrigin);
       if (!mailResult?.success) {
-        throw new Error("Verification email could not be sent");
+        throw new Error("Failed to send verification email");
       }
+      console.log("Verification email resent successfully to:", normalizedEmail);
+      return res.status(200).json({
+        success: true,
+        message: "Verification email sent successfully! Check your inbox.",
+      });
     } catch (mailErr) {
-      console.error("reVerify email error:", mailErr?.message || mailErr);
-      return res.status(502).json({
+      console.error("Email sending failed:", mailErr.message);
+      return res.status(500).json({
         success: false,
-        message:
-          mailErr?.message ||
-          "Unable to send verification email. Check SMTP configuration and try again.",
+        message: "Failed to send verification email. Please try again later or contact support.",
       });
     }
-
-    return res.status(200).json({
-      success: true,
-      message: "Verification email sent successfully",
-      token: user.token,
-    });
   } catch (error) {
     console.error("reVerify error:", error);
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "An error occurred. Please try again.",
     });
   }
 };
@@ -323,6 +351,7 @@ export const login = async (req, res) => {
     }
 
     if (!existingUser.isVerified) {
+      console.log("Login blocked - email not verified:", normalizedEmail);
       return res.status(400).json({
         success: false,
         message:

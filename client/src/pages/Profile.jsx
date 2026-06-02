@@ -1,362 +1,230 @@
 import React, { useState } from "react";
-import { Button } from "@/components/button";
-import { Input } from "@/components/input";
-import { Label } from "@/components/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/card";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
+import { User, Shield, Camera, Save, Lock, MapPin, Mail, Phone } from "lucide-react";
 import { setUser } from "@/redux/userSlice";
 import api from "@/lib/api";
-import { ShieldCheck, UserCircle2 } from "lucide-react";
+
+const TAB = { PROFILE: "profile", SECURITY: "security" };
 
 const Profile = () => {
-  const { user } = useSelector((store) => store.user);
+  const { user }   = useSelector((s) => s.user);
   const { userId } = useParams();
-  const dispatch = useDispatch();
-  const activeUserId = userId || user?._id || user?.id;
+  const dispatch   = useDispatch();
+  const activeId   = userId || user?._id || user?.id;
 
+  const [tab, setTab]       = useState(TAB.PROFILE);
   const [loading, setLoading] = useState(false);
+  const [file, setFile]     = useState(null);
 
-  const [updateUser, setUpdateUser] = useState({
-    firstName: user?.firstName || "",
-    lastName: user?.lastName || "",
-    email: user?.email || "",
+  const [form, setForm] = useState({
+    firstName:   user?.firstName   || "",
+    lastName:    user?.lastName    || "",
+    email:       user?.email       || "",
     phoneNumber: user?.phoneNumber || "",
-    address: user?.address || "",
-    city: user?.city || "",
-    zipCode: user?.zipCode || "",
-    profilePic: user?.profilePic || "/dummy.png",
-    role: user?.role || "user",
+    address:     Array.isArray(user?.address) ? user.address.join(", ") : user?.address || "",
+    city:        user?.city        || "",
+    zipCode:     user?.zipCode     || "",
+    profilePic:  user?.profilePic  || "/dummy.png",
+    role:        user?.role        || "user",
   });
 
-  const [passwordForm, setPasswordForm] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  });
-
-  const [file, setFile] = useState(null);
+  const [pwForm, setPwForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
 
   React.useEffect(() => {
     if (!user) return;
-
-    setUpdateUser({
-      firstName: user?.firstName || "",
-      lastName: user?.lastName || "",
-      email: user?.email || "",
-      phoneNumber: user?.phoneNumber || user?.phoneNo || "",
-      address: Array.isArray(user?.address)
-        ? user.address.join(", ")
-        : user?.address || "",
-      city: user?.city || "",
-      zipCode: user?.zipCode || "",
-      profilePic: user?.profilePic || "/dummy.png",
-      role: user?.role || "user",
+    setForm({
+      firstName:   user.firstName   || "",
+      lastName:    user.lastName    || "",
+      email:       user.email       || "",
+      phoneNumber: user.phoneNumber || user.phoneNo || "",
+      address:     Array.isArray(user.address) ? user.address.join(", ") : user.address || "",
+      city:        user.city        || "",
+      zipCode:     user.zipCode     || "",
+      profilePic:  user.profilePic  || "/dummy.png",
+      role:        user.role        || "user",
     });
   }, [user]);
 
-  const handleChange = (e) => {
-    setUpdateUser({ ...updateUser, [e.target.name]: e.target.value });
+  const onFileChange = (e) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setFile(f);
+    setForm((p) => ({ ...p, profilePic: URL.createObjectURL(f) }));
   };
 
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files?.[0];
-    if (!selectedFile) return;
-
-    setFile(selectedFile);
-    setUpdateUser({
-      ...updateUser,
-      profilePic: URL.createObjectURL(selectedFile),
-    });
-  };
-
-  const handleSubmit = async (e) => {
+  const submitProfile = async (e) => {
     e.preventDefault();
-
-    const accessToken = localStorage.getItem("accessToken");
-    if (!accessToken) {
-      toast.error("You are not logged in");
-      return;
-    }
-
+    if (!localStorage.getItem("accessToken")) { toast.error("Not logged in"); return; }
     try {
       setLoading(true);
-
-      const formData = new FormData();
-      formData.append("firstName", updateUser.firstName);
-      formData.append("lastName", updateUser.lastName);
-      formData.append("email", updateUser.email);
-      formData.append("phoneNumber", updateUser.phoneNumber);
-      formData.append("address", updateUser.address);
-      formData.append("city", updateUser.city);
-      formData.append("zipCode", updateUser.zipCode);
-      formData.append("role", updateUser.role);
-
-      if (file) {
-        formData.append("file", file);
-      }
-
-      const res = await api.put(`/user/update/${activeUserId}`, formData, {});
-
+      const fd = new FormData();
+      ["firstName","lastName","email","phoneNumber","address","city","zipCode","role"].forEach((k) => fd.append(k, form[k]));
+      if (file) fd.append("file", file);
+      const res = await api.put(`/user/update/${activeId}`, fd);
       if (res.data.success) {
-        toast.success(res.data.message);
         dispatch(setUser(res.data.user));
+        toast.success("Profile updated ✨");
       }
-    } catch (error) {
-      console.log(error);
-      toast.error(error.response?.data?.message || "Failed to update profile");
-    } finally {
-      setLoading(false);
-    }
+    } catch (e) {
+      toast.error(e.response?.data?.message || "Update failed");
+    } finally { setLoading(false); }
   };
 
-  const handlePasswordChange = (e) => {
-    setPasswordForm({ ...passwordForm, [e.target.name]: e.target.value });
-  };
-
-  const handlePasswordSubmit = async (e) => {
+  const submitPassword = async (e) => {
     e.preventDefault();
-
-    if (!user?.email) {
-      toast.error("You are not logged in");
-      return;
-    }
-
+    if (!user?.email) { toast.error("Not logged in"); return; }
     try {
       setLoading(true);
-      const res = await api.post(`/user/change-password/${user.email}`, {
-        currentPassword: passwordForm.currentPassword,
-        newPassword: passwordForm.newPassword,
-        confirmPassword: passwordForm.confirmPassword,
-      });
-
+      const res = await api.post(`/user/change-password/${user.email}`, pwForm);
       if (res.data.success) {
-        toast.success(res.data.message);
-        setPasswordForm({
-          currentPassword: "",
-          newPassword: "",
-          confirmPassword: "",
-        });
+        toast.success("Password changed ✨");
+        setPwForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
       }
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to change password");
-    } finally {
-      setLoading(false);
-    }
+    } catch (e) {
+      toast.error(e.response?.data?.message || "Failed to change password");
+    } finally { setLoading(false); }
   };
+
+  const FIELDS = [
+    { name: "firstName",   label: "First Name",    icon: User,  type: "text",  placeholder: "John",            half: true },
+    { name: "lastName",    label: "Last Name",     icon: User,  type: "text",  placeholder: "Doe",             half: true },
+    { name: "phoneNumber", label: "Phone",         icon: Phone, type: "tel",   placeholder: "+91 9876543210",  half: true },
+    { name: "city",        label: "City",          icon: MapPin,type: "text",  placeholder: "Mumbai",          half: true },
+    { name: "address",     label: "Address",       icon: MapPin,type: "text",  placeholder: "123 Main St",     half: false },
+    { name: "zipCode",     label: "ZIP / Pincode", icon: MapPin,type: "text",  placeholder: "400001",          half: true },
+  ];
 
   return (
-    <div className="px-4 pb-16 pt-28 lg:px-0 bg-slate-950 text-white">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-8 grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">
-          <div className="rounded-[2rem] border border-slate-800/70 bg-slate-950/95 p-8 shadow-[0_24px_70px_rgba(0,0,0,0.45)]">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-cyan-300/80">
-              Account center
-            </p>
-            <h1 className="mt-3 text-4xl font-semibold leading-tight">
-              Your profile, preferences, and security controls in one place.
-            </h1>
-            <div className="mt-6 flex items-center gap-4 rounded-3xl border border-slate-800/70 bg-slate-900/80 p-4">
-              <img
-                src={updateUser.profilePic}
-                alt="profile"
-                className="h-16 w-16 rounded-2xl object-cover"
-              />
-              <div>
-                <p className="text-lg font-semibold text-white">
-                  {updateUser.firstName || "Your account"}
-                </p>
-                <p className="text-sm text-slate-400">
-                  {updateUser.email || user?.email}
-                </p>
-              </div>
+    <div className="min-h-screen bg-bg text-white pt-20">
+      {/* Header */}
+      <div className="relative overflow-hidden border-b border-white/6 py-14 px-4 lg:px-6">
+        <div className="glow-orb w-80 h-80 bg-violet-700 -top-40 right-0 opacity-20" />
+        <div className="relative z-10 mx-auto max-w-5xl flex items-center gap-6">
+          <div className="relative flex-shrink-0">
+            <div className="h-20 w-20 rounded-3xl overflow-hidden ring-2 ring-violet-500/40">
+              <img src={form.profilePic} alt="avatar" className="w-full h-full object-cover" />
             </div>
-            <div className="mt-6 grid grid-cols-2 gap-3 text-sm text-slate-400">
-              <div className="rounded-2xl border border-slate-800/70 bg-slate-900/80 p-4">
-                <UserCircle2 className="h-5 w-5 text-cyan-300" />
-                <p className="mt-3 font-semibold text-white">Profile details</p>
-              </div>
-              <div className="rounded-2xl border border-slate-800/70 bg-slate-900/80 p-4">
-                <ShieldCheck className="h-5 w-5 text-cyan-300" />
-                <p className="mt-3 font-semibold text-white">Security</p>
-              </div>
-            </div>
+            <label htmlFor="avatar-upload" className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center cursor-pointer hover:scale-110 transition">
+              <Camera className="h-3.5 w-3.5 text-white" />
+            </label>
+            <input id="avatar-upload" type="file" accept="image/*" onChange={onFileChange} className="hidden" />
           </div>
-
-          <Tabs
-            defaultValue="profile"
-            className="rounded-[2rem] border border-slate-800/70 bg-slate-900/90 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur"
-          >
-            <TabsList className="grid w-full grid-cols-2 rounded-full bg-slate-800 p-1">
-              <TabsTrigger value="profile" className="rounded-full">
-                Profile
-              </TabsTrigger>
-              <TabsTrigger value="security" className="rounded-full">
-                Security
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="profile" className="mt-6">
-              <div className="grid gap-6 lg:grid-cols-[0.7fr_1.3fr]">
-                <Card className="border border-slate-800/70 bg-slate-950/90">
-                  <CardHeader>
-                    <CardTitle className="text-2xl text-white">
-                      Profile photo
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex flex-col items-center">
-                    <img
-                      src={updateUser.profilePic}
-                      alt="profile"
-                      className="h-36 w-36 rounded-full object-cover shadow-[0_20px_50px_rgba(0,0,0,0.35)] ring-4 ring-cyan-300/20"
-                    />
-
-                    <Label
-                      htmlFor="profilePic"
-                      className="mt-5 cursor-pointer rounded-full bg-cyan-500 px-4 py-2.5 font-semibold text-slate-950 transition hover:bg-cyan-400"
-                    >
-                      Change picture
-                    </Label>
-
-                    <input
-                      id="profilePic"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileChange}
-                      className="hidden"
-                    />
-                  </CardContent>
-                </Card>
-
-                <Card className="border border-slate-800/70 bg-slate-950/90">
-                  <CardHeader>
-                    <CardTitle className="text-2xl text-white">
-                      Personal information
-                    </CardTitle>
-                  </CardHeader>
-
-                  <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label className="text-slate-200">First Name</Label>
-                          <Input
-                            name="firstName"
-                            value={updateUser.firstName}
-                            onChange={handleChange}
-                          />
-                        </div>
-
-                        <div>
-                          <Label className="text-slate-200">Last Name</Label>
-                          <Input
-                            name="lastName"
-                            value={updateUser.lastName}
-                            onChange={handleChange}
-                          />
-                        </div>
-
-                        <div>
-                          <Label className="text-slate-200">Email</Label>
-                          <Input
-                            value={updateUser.email}
-                            disabled
-                            className="bg-slate-900 text-white"
-                          />
-                        </div>
-
-                        <div>
-                          <Label className="text-slate-200">Phone Number</Label>
-                          <Input
-                            name="phoneNumber"
-                            value={updateUser.phoneNumber}
-                            onChange={handleChange}
-                          />
-                        </div>
-
-                        <div>
-                          <Label className="text-slate-200">Address</Label>
-                          <Input
-                            name="address"
-                            value={updateUser.address}
-                            onChange={handleChange}
-                          />
-                        </div>
-
-                        <div>
-                          <Label className="text-slate-200">City</Label>
-                          <Input
-                            name="city"
-                            value={updateUser.city}
-                            onChange={handleChange}
-                          />
-                        </div>
-
-                        <div>
-                          <Label className="text-slate-200">Zip Code</Label>
-                          <Input
-                            name="zipCode"
-                            value={updateUser.zipCode}
-                            onChange={handleChange}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex justify-end pt-2">
-                        <Button type="submit" disabled={loading}>
-                          {loading ? "Updating..." : "Update profile"}
-                        </Button>
-                      </div>
-                    </form>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="security" className="mt-6">
-              <Card className="border border-slate-800/70 bg-slate-950/90">
-                <CardHeader>
-                  <CardTitle className="text-2xl text-white">
-                    Change password
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={handlePasswordSubmit} className="grid gap-4">
-                    <Input
-                      type="password"
-                      name="currentPassword"
-                      placeholder="Current password"
-                      value={passwordForm.currentPassword}
-                      onChange={handlePasswordChange}
-                      className="bg-slate-900 text-white"
-                    />
-                    <Input
-                      type="password"
-                      name="newPassword"
-                      placeholder="New password"
-                      value={passwordForm.newPassword}
-                      onChange={handlePasswordChange}
-                      className="bg-slate-900 text-white"
-                    />
-                    <Input
-                      type="password"
-                      name="confirmPassword"
-                      placeholder="Confirm new password"
-                      value={passwordForm.confirmPassword}
-                      onChange={handlePasswordChange}
-                      className="bg-slate-900 text-white"
-                    />
-                    <Button type="submit" disabled={loading}>
-                      {loading ? "Saving..." : "Save password"}
-                    </Button>
-                  </form>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+          <div>
+            <span className="section-label text-violet-400">Account Center</span>
+            <h1 className="font-display text-4xl text-white mt-1">
+              {form.firstName || "Your"} {form.lastName || "Profile"}
+            </h1>
+            <p className="text-sm text-white/40 mt-1 flex items-center gap-2">
+              <Mail className="h-3.5 w-3.5" />
+              {form.email || user?.email}
+            </p>
+          </div>
         </div>
+      </div>
+
+      <div className="mx-auto max-w-5xl px-4 lg:px-6 py-10">
+        {/* Tabs */}
+        <div className="flex gap-2 mb-8 glass inline-flex rounded-3xl p-1.5 w-fit">
+          {[{ id: TAB.PROFILE, icon: User, label: "Profile" }, { id: TAB.SECURITY, icon: Shield, label: "Security" }].map(({ id, icon: Icon, label }) => (
+            <button
+              key={id}
+              onClick={() => setTab(id)}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-semibold transition ${
+                tab === id
+                  ? "bg-gradient-to-r from-violet-500/20 to-pink-500/20 text-white border border-violet-500/25"
+                  : "text-white/40 hover:text-white"
+              }`}
+            >
+              <Icon className="h-4 w-4" /> {label}
+            </button>
+          ))}
+        </div>
+
+        {tab === TAB.PROFILE && (
+          <form onSubmit={submitProfile} className="animate-fade-up">
+            <div className="glass rounded-4xl p-8">
+              <h2 className="font-display text-2xl text-white mb-7">Personal Information</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                {FIELDS.map(({ name, label, icon: Icon, type, placeholder, half }) => (
+                  <div key={name} className={`space-y-1.5 ${!half ? "sm:col-span-2" : ""}`}>
+                    <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-white/35">
+                      <Icon className="h-3.5 w-3.5" /> {label}
+                    </label>
+                    <input
+                      name={name} type={type} value={form[name]}
+                      onChange={(e) => setForm((p) => ({ ...p, [e.target.name]: e.target.value }))}
+                      placeholder={placeholder}
+                      className="input-dark w-full"
+                    />
+                  </div>
+                ))}
+
+                {/* Email (disabled) */}
+                <div className="space-y-1.5">
+                  <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-white/35">
+                    <Mail className="h-3.5 w-3.5" /> Email
+                  </label>
+                  <input
+                    value={form.email} disabled
+                    className="input-dark w-full opacity-40 cursor-not-allowed"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-8 flex justify-end">
+                <button type="submit" disabled={loading} className="btn-glow disabled:opacity-50">
+                  {loading ? (
+                    <>
+                      <span className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin" />
+                      Saving…
+                    </>
+                  ) : (
+                    <><Save className="h-4 w-4" /> Save Changes</>
+                  )}
+                </button>
+              </div>
+            </div>
+          </form>
+        )}
+
+        {tab === TAB.SECURITY && (
+          <form onSubmit={submitPassword} className="animate-fade-up">
+            <div className="glass rounded-4xl p-8 max-w-lg">
+              <div className="flex items-center gap-3 mb-7">
+                <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center">
+                  <Lock className="h-5 w-5 text-white" />
+                </div>
+                <h2 className="font-display text-2xl text-white">Change Password</h2>
+              </div>
+              <div className="space-y-4">
+                {[
+                  { name: "currentPassword", label: "Current Password" },
+                  { name: "newPassword",     label: "New Password" },
+                  { name: "confirmPassword", label: "Confirm New Password" },
+                ].map(({ name, label }) => (
+                  <div key={name} className="space-y-1.5">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-white/35">{label}</label>
+                    <input
+                      name={name} type="password" value={pwForm[name]}
+                      onChange={(e) => setPwForm((p) => ({ ...p, [e.target.name]: e.target.value }))}
+                      placeholder="••••••••"
+                      className="input-dark w-full"
+                    />
+                  </div>
+                ))}
+                <button type="submit" disabled={loading} className="btn-glow w-full justify-center py-3 disabled:opacity-50 mt-2">
+                  {loading ? (
+                    <span className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin" />
+                  ) : (
+                    <><Shield className="h-4 w-4" /> Update Password</>
+                  )}
+                </button>
+              </div>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );

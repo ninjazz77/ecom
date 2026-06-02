@@ -1,234 +1,248 @@
-import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { Search, X, ShoppingCart } from "lucide-react";
-import { RiMenu3Line, RiDashboardLine, RiUser3Line } from "react-icons/ri";
-
-import { Button } from "../button";
-import { Input } from "../input";
+import { Search, X, ShoppingCart, Menu, User, LayoutDashboard, LogOut, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { setUser } from "@/redux/userSlice";
 import { setCart } from "@/redux/productsSlice";
 import api from "@/lib/api";
 
 const Navbar = () => {
-  const { user } = useSelector((store) => store.user);
-  const { cart } = useSelector((store) => store.product);
+  const { user } = useSelector((s) => s.user);
+  const { cart } = useSelector((s) => s.product);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = React.useState(false);
-  const [searchTerm, setSearchTerm] = React.useState("");
+  const location = useLocation();
+
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [scrolled, setScrolled] = useState(false);
+  const searchRef = useRef(null);
 
   const resolvedUserId = user?._id || user?.id;
   const cartCount = cart?.items?.length || 0;
 
-  const logoutHandler = async () => {
-    try {
-      await api.post("/user/logout", {});
-    } catch {
-      console.log("Backend logout failed, forcing frontend logout");
-    } finally {
-      localStorage.removeItem("accessToken");
-      dispatch(setUser(null));
-      dispatch(setCart(null));
-      toast.success("Logged out successfully");
-      navigate("/login");
-    }
-  };
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
-  const submitSearch = (event) => {
-    event.preventDefault();
-    const query = searchTerm.trim();
-    if (!query) return;
+  useEffect(() => {
+    if (searchOpen && searchRef.current) searchRef.current.focus();
+  }, [searchOpen]);
 
-    navigate(`/products?q=${encodeURIComponent(query)}`);
+  useEffect(() => {
     setMenuOpen(false);
+    setSearchOpen(false);
+  }, [location.pathname]);
+
+  const logout = async () => {
+    try { await api.post("/user/logout", {}); } catch {}
+    localStorage.removeItem("accessToken");
+    dispatch(setUser(null));
+    dispatch(setCart(null));
+    toast.success("See you soon!");
+    navigate("/login");
   };
+
+  const submitSearch = (e) => {
+    e.preventDefault();
+    if (!searchTerm.trim()) return;
+    navigate(`/products?q=${encodeURIComponent(searchTerm.trim())}`);
+    setSearchTerm("");
+    setSearchOpen(false);
+  };
+
+  const navLinks = [
+    { to: "/", label: "Home" },
+    { to: "/products", label: "Shop" },
+  ];
 
   return (
-    <header className="sticky top-0 z-50 shadow-sm">
-      <div className="bg-[#ffd500] text-slate-950">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] sm:flex-nowrap">
-          <span>10 Cr+ products sold</span>
-          <span className="text-slate-800/90">
-            Free shipping on orders above ₹999 • 24x7 support
-          </span>
-        </div>
-      </div>
-      <div className="bg-white shadow-[0_15px_45px_rgba(15,23,42,0.08)]">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-4 lg:px-6">
-          <Link to="/" className="flex items-center gap-3 text-slate-950">
-            <span className="logo inline-flex h-12 w-12 items-center justify-center rounded-[1.5rem] bg-black text-lg font-black text-white shadow-[0_24px_70px_rgba(0,0,0,0.15)]">
-              F
-            </span>
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.28em] text-slate-900">
-                Flux
-              </p>
-              <p className="text-base font-semibold text-slate-700">
-                Shop the latest
-              </p>
+    <>
+      <header
+        className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
+          scrolled
+            ? "glass border-b border-white/8 shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
+            : "bg-transparent"
+        }`}
+      >
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 lg:px-6">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-3 group">
+            <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-violet-500 to-pink-500 animate-gradient" />
+              <Zap className="relative z-10 h-5 w-5 text-white" fill="white" />
             </div>
+            <span className="font-display text-xl font-black tracking-tight text-white hidden sm:block">
+              Flux<span className="gradient-text">.</span>
+            </span>
           </Link>
 
-          <form
-            onSubmit={submitSearch}
-            className="hidden flex-1 items-center gap-3 rounded-full border border-slate-200 bg-slate-100 px-4 py-2 lg:flex"
-          >
-            <Search className="h-4 w-4 text-slate-500" />
-            <Input
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="Search products, brands or styles"
-              className="h-auto border-0 bg-transparent px-0 py-0 text-slate-950 placeholder:text-slate-500 shadow-none focus-visible:ring-0"
-            />
-          </form>
+          {/* Center nav */}
+          <nav className="hidden lg:flex items-center gap-1">
+            {navLinks.map(({ to, label }) => (
+              <Link
+                key={to}
+                to={to}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                  location.pathname === to
+                    ? "bg-white/10 text-white"
+                    : "text-white/60 hover:text-white hover:bg-white/6"
+                }`}
+              >
+                {label}
+              </Link>
+            ))}
+          </nav>
 
-          <div className="hidden items-center gap-3 md:flex">
-            <Link
-              to="/products"
-              className="text-sm font-semibold text-slate-900 transition hover:text-slate-700"
+          {/* Right actions */}
+          <div className="flex items-center gap-2">
+            {/* Search toggle */}
+            <button
+              onClick={() => setSearchOpen((p) => !p)}
+              className="h-10 w-10 flex items-center justify-center rounded-full glass text-white/70 hover:text-white transition"
+              aria-label="Search"
             >
-              Shop
+              <Search className="h-4 w-4" />
+            </button>
+
+            {/* Cart */}
+            <Link
+              to="/cart"
+              className="relative h-10 w-10 flex items-center justify-center rounded-full glass text-white/70 hover:text-white transition"
+              aria-label="Cart"
+            >
+              <ShoppingCart className="h-4 w-4" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-gradient-to-r from-violet-500 to-pink-500 text-[10px] font-bold text-white px-1">
+                  {cartCount}
+                </span>
+              )}
             </Link>
-            {user?.role === "admin" ? (
+
+            {/* Admin */}
+            {user?.role === "admin" && (
               <Link
                 to="/admin"
-                className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-4 py-2 text-sm text-slate-900 transition hover:bg-slate-200"
+                className="hidden sm:flex h-10 px-4 items-center gap-2 rounded-full glass text-white/70 hover:text-white text-sm font-medium transition"
               >
-                <RiDashboardLine className="h-4 w-4" /> Admin
+                <LayoutDashboard className="h-4 w-4" />
+                Admin
               </Link>
-            ) : null}
+            )}
+
+            {/* Account / Login */}
             {resolvedUserId ? (
               <Link
                 to={`/profile/${resolvedUserId}`}
-                className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-4 py-2 text-sm text-slate-900 transition hover:bg-slate-200"
+                className="hidden sm:flex h-10 px-4 items-center gap-2 rounded-full glass text-white/70 hover:text-white text-sm font-medium transition"
               >
-                <RiUser3Line className="h-4 w-4" /> Account
+                <User className="h-4 w-4" />
+                Account
               </Link>
             ) : (
               <Link
                 to="/login"
-                className="text-sm font-semibold text-slate-900 transition hover:text-slate-700"
+                className="hidden sm:inline-flex btn-glow text-sm py-2 px-5"
               >
-                Login
+                Sign in
               </Link>
             )}
-            <Link
-              to="/cart"
-              className="relative inline-flex items-center justify-center rounded-full border border-slate-200 bg-slate-100 px-3 py-3 text-slate-900 transition hover:bg-slate-200"
-            >
-              <ShoppingCart className="h-5 w-5" />
-              {cartCount > 0 ? (
-                <span className="absolute -right-2 -top-2 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-slate-950 px-2 text-[11px] font-semibold text-white">
-                  {cartCount}
-                </span>
-              ) : null}
-            </Link>
-            {resolvedUserId ? (
-              <Button onClick={logoutHandler} variant="secondary">
-                Logout
-              </Button>
-            ) : (
-              <Button onClick={() => navigate("/login")}>Get started</Button>
-            )}
-          </div>
 
-          <button
-            type="button"
-            onClick={() => setMenuOpen((current) => !current)}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-slate-900 shadow-[0_15px_35px_rgba(15,23,42,0.12)] lg:hidden"
-            aria-label="Toggle navigation menu"
-          >
-            {menuOpen ? (
-              <X className="h-5 w-5" />
-            ) : (
-              <RiMenu3Line className="h-5 w-5" />
+            {resolvedUserId && (
+              <button
+                onClick={logout}
+                className="hidden sm:flex h-10 w-10 items-center justify-center rounded-full glass text-white/50 hover:text-red-400 transition"
+                aria-label="Logout"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
             )}
-          </button>
+
+            {/* Mobile menu toggle */}
+            <button
+              onClick={() => setMenuOpen((p) => !p)}
+              className="lg:hidden h-10 w-10 flex items-center justify-center rounded-full glass text-white/70 hover:text-white transition"
+              aria-label="Menu"
+            >
+              {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
         </div>
 
-        {menuOpen ? (
-          <div className="lg:hidden border-t border-slate-200 bg-white p-4">
-            <div className="space-y-4 rounded-[2rem] border border-slate-200 bg-slate-50 p-4 shadow-[0_20px_50px_rgba(15,23,42,0.08)]">
-              <form onSubmit={submitSearch} className="space-y-3">
-                <div className="relative rounded-[1.5rem] border border-slate-200 bg-white px-4 py-2">
-                  <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                  <Input
-                    value={searchTerm}
-                    onChange={(event) => setSearchTerm(event.target.value)}
-                    placeholder="Search the catalog"
-                    className="pl-11 bg-transparent text-slate-950"
-                  />
-                </div>
-              </form>
-              <div className="grid gap-3">
+        {/* Search bar */}
+        {searchOpen && (
+          <div className="border-t border-white/8 px-4 py-3 lg:px-6 animate-fade-up glass">
+            <form onSubmit={submitSearch} className="mx-auto max-w-2xl flex gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40 pointer-events-none" />
+                <input
+                  ref={searchRef}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search products, brands, categories…"
+                  className="input-dark w-full pl-11"
+                />
+              </div>
+              <button type="submit" className="btn-glow py-2 px-5 text-sm">
+                Search
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* Mobile menu */}
+        {menuOpen && (
+          <div className="lg:hidden border-t border-white/8 glass animate-fade-up">
+            <div className="px-4 py-5 space-y-2">
+              {navLinks.map(({ to, label }) => (
                 <Link
-                  to="/products"
-                  className="rounded-[1.5rem] border border-slate-200 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-200"
-                  onClick={() => setMenuOpen(false)}
+                  key={to}
+                  to={to}
+                  className="block px-4 py-3 rounded-2xl text-white/70 hover:text-white hover:bg-white/6 text-sm font-medium transition"
                 >
-                  Shop
+                  {label}
                 </Link>
-                {user?.role === "admin" ? (
-                  <Link
-                    to="/admin"
-                    className="rounded-[1.5rem] border border-slate-200 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-200"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    Admin
-                  </Link>
-                ) : null}
-                {resolvedUserId ? (
+              ))}
+              {user?.role === "admin" && (
+                <Link
+                  to="/admin"
+                  className="flex items-center gap-3 px-4 py-3 rounded-2xl text-white/70 hover:text-white hover:bg-white/6 text-sm font-medium transition"
+                >
+                  <LayoutDashboard className="h-4 w-4" /> Admin Dashboard
+                </Link>
+              )}
+              {resolvedUserId ? (
+                <>
                   <Link
                     to={`/profile/${resolvedUserId}`}
-                    className="rounded-[1.5rem] border border-slate-200 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-200"
-                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 rounded-2xl text-white/70 hover:text-white hover:bg-white/6 text-sm font-medium transition"
                   >
-                    Account
+                    <User className="h-4 w-4" /> My Account
                   </Link>
-                ) : (
-                  <Link
-                    to="/login"
-                    className="rounded-[1.5rem] border border-slate-200 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-200"
-                    onClick={() => setMenuOpen(false)}
+                  <button
+                    onClick={logout}
+                    className="flex items-center gap-3 px-4 py-3 rounded-2xl text-red-400 hover:bg-red-400/10 text-sm font-medium transition w-full"
                   >
-                    Login
-                  </Link>
-                )}
-              </div>
-              <div className="flex items-center gap-3">
+                    <LogOut className="h-4 w-4" /> Sign Out
+                  </button>
+                </>
+              ) : (
                 <Link
-                  to="/cart"
-                  className="relative inline-flex h-12 min-w-[3rem] items-center justify-center rounded-[1.5rem] border border-slate-200 bg-slate-100 text-slate-900 transition hover:bg-slate-200"
-                  onClick={() => setMenuOpen(false)}
+                  to="/login"
+                  className="block w-full text-center btn-glow text-sm py-2.5 rounded-2xl"
                 >
-                  <ShoppingCart className="h-5 w-5" />
-                  {cartCount > 0 ? (
-                    <span className="absolute -right-2 -top-2 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-slate-950 px-2 text-[11px] font-semibold text-white">
-                      {cartCount}
-                    </span>
-                  ) : null}
+                  Sign In
                 </Link>
-                {resolvedUserId ? (
-                  <Button
-                    onClick={logoutHandler}
-                    className="flex-1"
-                    variant="secondary"
-                  >
-                    Logout
-                  </Button>
-                ) : (
-                  <Button onClick={() => navigate("/login")} className="flex-1">
-                    Get started
-                  </Button>
-                )}
-              </div>
+              )}
             </div>
           </div>
-        ) : null}
-      </div>
-    </header>
+        )}
+      </header>
+    </>
   );
 };
 

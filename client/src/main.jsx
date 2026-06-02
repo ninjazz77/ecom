@@ -20,7 +20,8 @@ createRoot(document.getElementById("root")).render(
           richColors
           toastOptions={{
             className:
-              "!rounded-2xl !border !border-slate-200 !bg-white/95 !text-slate-950 !shadow-[0_18px_60px_rgba(15,23,42,0.12)]",
+              "!rounded-2xl !border !border-white/10 !bg-[rgba(15,15,20,0.95)] !text-white !shadow-[0_20px_60px_rgba(0,0,0,0.5)] !backdrop-blur-xl",
+            style: { fontFamily: "Inter, sans-serif" },
           }}
         />
       </PersistGate>

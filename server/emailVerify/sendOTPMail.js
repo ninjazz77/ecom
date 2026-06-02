@@ -11,7 +11,7 @@ export const SendOTPMail = async (otp, email) => {
     const fromAddress = getFromAddress();
     if (!fromAddress) {
       throw new Error(
-        "Email sender address is missing. Set EMAIL_FROM or MAIL_FROM.",
+        "Email sender address is missing. Set EMAIL_FROM, MAIL_FROM, SMTP_FROM, or SMTP_USER.",
       );
     }
 

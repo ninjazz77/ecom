@@ -1,33 +1,31 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "../button";
-import { Heart, ShoppingCart, Sparkles } from "lucide-react";
-import { Skeleton } from "./skeleton";
+import { Heart, ShoppingCart, Star, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { useDispatch } from "react-redux";
 import { setCart } from "@/redux/productsSlice";
 import api, { getApiErrorMessage } from "@/lib/api";
 
-const ProductCard = ({ product, loading }) => {
-  const { productImg = [], productPrice, productName } = product || {};
+const ProductCard = ({ product, loading, onOpenDetails }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { productImg = [], productPrice, productName } = product || {};
   const isActive = product?.isActive !== false;
   const stock = Number(product?.stock || 0);
   const canPurchase = isActive && stock > 0;
 
-  const addtoCart = async (productId) => {
+  const addToCart = async (e) => {
+    e.stopPropagation();
     const token = localStorage.getItem("accessToken");
     if (!token) {
-      toast.error("Login to add items to your cart.");
-      setTimeout(() => navigate("/login"), 900);
+      toast.error("Sign in to add items to cart.");
+      setTimeout(() => navigate("/login"), 800);
       return;
     }
-
     try {
-      const res = await api.post("/cart/add", { productId });
+      const res = await api.post("/cart/add", { productId: product._id });
       if (res.data.success) {
-        toast.success("Added to cart");
+        toast.success("Added to cart ✨");
         dispatch(setCart(res.data.cart));
       }
     } catch (error) {
@@ -35,87 +33,110 @@ const ProductCard = ({ product, loading }) => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="product-card rounded-3xl overflow-hidden">
+        <div className="aspect-[4/5] animate-shimmer" />
+        <div className="p-5 space-y-3">
+          <div className="h-4 w-3/4 rounded-full animate-shimmer" />
+          <div className="h-4 w-1/2 rounded-full animate-shimmer" />
+          <div className="h-10 rounded-2xl animate-shimmer" />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="group overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white/95 shadow-[0_25px_80px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_36px_110px_rgba(15,23,42,0.18)]">
-      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[1.75rem] bg-slate-100">
-        {loading ? (
-          <Skeleton className="h-full w-full rounded-[1.75rem]" />
-        ) : (
-          <>
-            <img
-              src={productImg[0]?.url || "/Flux.png"}
-              alt={productName || "Product"}
-              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-            />
-            <div className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full bg-amber-100/90 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-amber-700 backdrop-blur-sm">
-              <Sparkles className="h-4 w-4 text-amber-500" />
-              {product?.isFeatured ? "Featured" : "Collection"}
-            </div>
-            <button
-              type="button"
-              className="absolute right-4 top-4 inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white/90 text-slate-950 shadow-[0_12px_30px_rgba(15,23,42,0.12)] transition hover:bg-white"
-              onClick={() => toast.info("Wishlist coming soon")}
-            >
-              <Heart className="h-4 w-4" />
-            </button>
-          </>
-        )}
+    <div
+      className="product-card"
+      onClick={() => onOpenDetails && onOpenDetails(product)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === "Enter" && onOpenDetails && onOpenDetails(product)}
+      aria-label={`View details for ${productName}`}
+    >
+      <div className="img-wrap">
+        <img
+          src={productImg[0]?.url || "/Ekart.png"}
+          alt={productName || "Product"}
+          loading="lazy"
+        />
+        {/* overlay on hover */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+        {/* badges */}
+        <div className="absolute top-3 left-3 flex gap-2">
+          {product?.isFeatured && (
+            <span className="badge badge-purple">
+              <Star className="h-2.5 w-2.5" /> Featured
+            </span>
+          )}
+          {stock <= 5 && stock > 0 && (
+            <span className="badge badge-amber">
+              <Zap className="h-2.5 w-2.5" /> Low Stock
+            </span>
+          )}
+          {!canPurchase && (
+            <span className="badge badge-red">Sold Out</span>
+          )}
+        </div>
+
+        {/* Wishlist */}
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); toast.info("Wishlist coming soon!"); }}
+          className="absolute top-3 right-3 h-9 w-9 rounded-full glass flex items-center justify-center text-white/70 hover:text-pink-400 transition"
+          aria-label="Add to wishlist"
+        >
+          <Heart className="h-4 w-4" />
+        </button>
       </div>
 
-      {loading ? (
-        <div className="space-y-4 p-5">
-          <Skeleton className="h-4 w-3/4 rounded-full" />
-          <Skeleton className="h-4 w-1/2 rounded-full" />
-          <Skeleton className="h-11 rounded-[1.5rem]" />
+      <div className="p-5 space-y-4">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">
+            {product?.category || "General"}
+          </p>
+          <h3 className="mt-1.5 text-base font-semibold text-white line-clamp-2 leading-snug">
+            {productName}
+          </h3>
         </div>
-      ) : (
-        <div className="space-y-4 p-5">
+
+        {/* Rating mock */}
+        <div className="flex items-center gap-1.5">
+          {[1,2,3,4,5].map((s) => (
+            <Star
+              key={s}
+              className={`h-3 w-3 ${s <= 4 ? "text-amber-400 fill-amber-400" : "text-white/20"}`}
+            />
+          ))}
+          <span className="text-[10px] text-white/30 ml-1">(48)</span>
+        </div>
+
+        <div className="flex items-center justify-between gap-3">
           <div>
-            <h2 className="line-clamp-2 text-lg font-semibold text-slate-950">
-              {productName}
-            </h2>
-            <p className="mt-2 text-sm uppercase tracking-[0.22em] text-slate-500">
-              {product?.category || "General"}
+            <p className="text-xl font-display font-black text-white">
+              ₹{Number(productPrice || 0).toLocaleString()}
             </p>
+            <p className="text-[10px] text-white/30 mt-0.5">Free shipping over ₹999</p>
           </div>
-          <div className="flex flex-wrap gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-            {product?.isFeatured && (
-              <span className="rounded-full bg-amber-100 px-2 py-1 text-amber-700">
-                Featured
-              </span>
-            )}
-            {!isActive && (
-              <span className="rounded-full bg-rose-100 px-2 py-1 text-rose-600">
-                Disabled
-              </span>
-            )}
-            <span className="rounded-full bg-slate-100 px-2 py-1 text-slate-700">
-              {stock > 0 ? `${stock} in stock` : "Out of stock"}
-            </span>
-          </div>
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
-                Starting at
-              </p>
-              <p className="mt-1 text-2xl font-semibold text-slate-950">
-                ₹{Number(productPrice || 0).toLocaleString()}
-              </p>
-            </div>
-            <span className="rounded-full bg-amber-100 px-3 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-amber-700">
-              Fast ship
-            </span>
-          </div>
-          <Button
-            onClick={() => addtoCart(product._id)}
-            className="w-full"
+
+          <button
+            type="button"
+            onClick={addToCart}
             disabled={!canPurchase}
+            className={`flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 ${
+              canPurchase
+                ? "bg-gradient-to-r from-violet-500 to-pink-500 text-white hover:shadow-glow hover:-translate-y-0.5"
+                : "bg-white/8 text-white/30 cursor-not-allowed"
+            }`}
+            aria-label={canPurchase ? "Add to cart" : "Unavailable"}
           >
-            <ShoppingCart />
-            {canPurchase ? "Add to cart" : "Unavailable"}
-          </Button>
+            <ShoppingCart className="h-4 w-4" />
+            {canPurchase ? "Add" : "Out"}
+          </button>
         </div>
-      )}
+      </div>
     </div>
   );
 };

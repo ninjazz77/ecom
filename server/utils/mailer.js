@@ -5,17 +5,42 @@ const trimValue = (value) => String(value || "").trim();
 const normalizePassword = (value) => trimValue(value).replace(/\s+/g, "");
 
 const getMailUser = () =>
-  trimValue(process.env.SMTP_USER || process.env.MAIL_USER || "");
+  trimValue(
+    process.env.SMTP_USER ||
+      process.env.MAIL_USER ||
+      process.env.SMTP_USERNAME ||
+      process.env.MAIL_USERNAME ||
+      process.env.EMAIL_USERNAME ||
+      process.env.SMTP_EMAIL ||
+      process.env.MAIL_EMAIL ||
+      "",
+  );
 
 const getMailPassword = () =>
-  normalizePassword(process.env.SMTP_PASS || process.env.MAIL_PASS || "");
+  normalizePassword(
+    process.env.SMTP_PASS ||
+      process.env.MAIL_PASS ||
+      process.env.SMTP_PASSWORD ||
+      process.env.MAIL_PASSWORD ||
+      "",
+  );
 
 const getMailFrom = () => {
   const fromAddress = trimValue(
-    process.env.EMAIL_FROM || process.env.MAIL_FROM || getMailUser(),
+    process.env.EMAIL_FROM ||
+      process.env.MAIL_FROM ||
+      process.env.SMTP_FROM ||
+      process.env.MAIL_FROM_ADDRESS ||
+      process.env.SMTP_EMAIL ||
+      process.env.MAIL_EMAIL ||
+      getMailUser(),
   );
   const fromName = trimValue(
-    process.env.EMAIL_FROM_NAME || process.env.MAIL_FROM_NAME || "Ekart",
+    process.env.EMAIL_FROM_NAME ||
+      process.env.MAIL_FROM_NAME ||
+      process.env.SMTP_FROM_NAME ||
+      process.env.MAIL_FROM_NAME ||
+      "Ekart",
   );
 
   if (!fromAddress) {
@@ -40,7 +65,7 @@ const getTransportOptions = () => {
 
   if (!user || !pass) {
     throw new Error(
-      "Email service is not configured. Set SMTP_USER/SMTP_PASS or MAIL_USER/MAIL_PASS.",
+      "Email service is not configured. Set SMTP_USER/SMTP_PASS, MAIL_USER/MAIL_PASS, or equivalent mail credentials.",
     );
   }
 

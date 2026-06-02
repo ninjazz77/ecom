@@ -5,50 +5,37 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        display: ["Space Grotesk", "sans-serif"],
-        sans: ["Plus Jakarta Sans", "sans-serif"],
-      },
-      borderRadius: {
-        xl: "1.5rem",
-        "2xl": "2rem",
-        "3xl": "2.5rem",
+        display: ["Syne", "sans-serif"],
+        sans: ["Inter", "system-ui", "sans-serif"],
       },
       colors: {
-        background: "hsl(var(--background))",
-        "background-alt": "hsl(var(--background-alt))",
-        surface: "hsl(var(--surface))",
-        "surface-soft": "hsl(var(--surface-soft))",
-        "surface-strong": "hsl(var(--surface-strong))",
-        panel: "hsl(var(--panel))",
-        "panel-soft": "hsl(var(--panel-soft))",
-        text: "hsl(var(--text))",
-        muted: "hsl(var(--muted))",
-        border: "hsl(var(--border))",
-        ring: "hsl(var(--ring))",
-        primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
-        },
-        secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-        },
-        accent: {
-          DEFAULT: "hsl(var(--accent))",
-        },
-        success: {
-          DEFAULT: "hsl(var(--success))",
-        },
-        warning: {
-          DEFAULT: "hsl(var(--warning))",
-        },
-        error: {
-          DEFAULT: "hsl(var(--error))",
-        },
+        bg:       "hsl(var(--bg))",
+        surface:  "hsl(var(--surface))",
+        surface2: "hsl(var(--surface-2))",
+        border:   "hsl(var(--border))",
+        text:     "hsl(var(--text))",
+        muted:    "hsl(var(--text-muted))",
+        accent:   "hsl(var(--accent))",
+        accent2:  "hsl(var(--accent-2))",
+        accent3:  "hsl(var(--accent-3))",
+      },
+      borderRadius: {
+        "4xl": "2rem",
+        "5xl": "2.5rem",
       },
       boxShadow: {
-        glow: "0 20px 60px rgba(56,189,248,0.18)",
-        float: "0 30px 80px rgba(56,189,248,0.16)",
+        glow:   "0 0 40px rgba(168,85,247,0.3)",
+        "glow-lg": "0 0 80px rgba(168,85,247,0.4)",
+        card:   "0 24px 60px rgba(0,0,0,0.4)",
+        "card-lg": "0 40px 100px rgba(0,0,0,0.5)",
+      },
+      backgroundImage: {
+        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
+        "glow-purple": "radial-gradient(circle, rgba(168,85,247,0.4) 0%, transparent 70%)",
+        "glow-pink":   "radial-gradient(circle, rgba(236,72,153,0.4) 0%, transparent 70%)",
+        "glow-cyan":   "radial-gradient(circle, rgba(6,182,212,0.4) 0%, transparent 70%)",
       },
     },
   },
+  plugins: [],
 };
