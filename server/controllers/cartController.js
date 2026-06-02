@@ -24,8 +24,10 @@ const recalculateCart = (cart) => {
       item.productId &&
       typeof item.productId === "object" &&
       "productPrice" in item.productId;
+    // Always use current product price if available (populated)
     const productPrice = normalizePrice(item.productId?.productPrice);
     const price = hasPopulatedProduct ? productPrice : normalizePrice(item.price);
+    // Sync stored price with current product price
     item.price = price;
     item.quantity = normalizeQuantity(item.quantity);
     return acc + price * item.quantity;
@@ -208,6 +210,7 @@ export const updateQuantity = async (req, res) => {
       item.quantity -= 1;
     }
 
+    // Always sync with current product price
     item.price = normalizePrice(product.productPrice);
     cart = await saveAndReturnCart(cart);
 

@@ -32,8 +32,13 @@ const Login = () => {
       setLoading(true);
       const res = await api.post("/user/login", form);
       if (res.data.success) {
-        dispatch(setUser(res.data.user));
+        // Store token first
         localStorage.setItem("accessToken", res.data.accessToken);
+        
+        // Then dispatch user (this triggers cart loading in App.jsx)
+        dispatch(setUser(res.data.user));
+        
+        // Load cart immediately
         try {
           const cartRes = await api.get("/cart");
           if (cartRes.data?.success) {
@@ -42,6 +47,7 @@ const Login = () => {
         } catch {
           dispatch(setCart(null));
         }
+        
         toast.success("Welcome back! ✨");
         navigate("/");
       }

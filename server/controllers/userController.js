@@ -7,7 +7,13 @@ import { SendOTPMail } from "../emailVerify/sendOTPMail.js";
 import cloudinary from "../utils/cloudinary.js";
 import getDataUri from "../utils/dataUri.js";
 
-const jwtSecret = process.env.SECRET_KEY || "flux-dev-secret";
+const jwtSecret = process.env.SECRET_KEY;
+
+if (!jwtSecret) {
+  console.error("CRITICAL: SECRET_KEY environment variable is not set!");
+  console.error("Please set SECRET_KEY in your .env file before starting the server.");
+  process.exit(1);
+}
 
 const normalizeEmail = (value) =>
   String(value || "")
@@ -421,14 +427,21 @@ export const login = async (req, res) => {
     existingUser.isLoggedIn = true;
     await existingUser.save();
 
-    // If a session exists, delete it first (so we have a single current session)
-    const existingSession = await Session.findOne({ userId: existingUser._id });
-    if (existingSession) {
-      await Session.deleteOne({ userId: existingUser._id });
-    }
+    // Invalidate all previous sessions for this user (single session policy)
+    await Session.updateMany(
+      { userId: existingUser._id, isActive: true },
+      { $set: { isActive: false } }
+    );
 
-    // Create a new session document
-    await Session.create({ userId: existingUser._id });
+    // Create a new session document with token information
+    const sessionExpiresAt = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000); // 10 days
+    await Session.create({
+      userId: existingUser._id,
+      accessToken,
+      refreshToken,
+      isActive: true,
+      expiresAt: sessionExpiresAt,
+    });
 
     // Do not send sensitive fields back
     const safeUser = {
@@ -472,7 +485,17 @@ export const logout = async (req, res) => {
       });
     }
 
-    await Session.deleteOne({ userId });
+    // Extract token from header
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.startsWith("Bearer ") ? authHeader.split(" ")[1] : null;
+
+    // Invalidate all active sessions for this user
+    await Session.updateMany(
+      { userId, isActive: true },
+      { $set: { isActive: false } }
+    );
+    
+    // Update user's logged in status
     await User.findByIdAndUpdate(userId, { isLoggedIn: false });
 
     return res.status(200).json({

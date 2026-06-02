@@ -16,6 +16,8 @@ const persistConfig = {
   key: "Flux",
   version: 1,
   storage,
+  // Only persist non-sensitive product data, not user auth data
+  whitelist: ["product"],
 };
 const rootReducer = combineReducers({
   user: userSlice,

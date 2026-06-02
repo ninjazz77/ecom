@@ -114,30 +114,59 @@ const router = createBrowserRouter([
 const App = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((store) => store.user);
+  const [sessionRestored, setSessionRestored] = React.useState(false);
 
   React.useEffect(() => {
     const restoreSession = async () => {
       const token = localStorage.getItem("accessToken");
-      if (!token || user) return;
+      if (!token) {
+        setSessionRestored(true);
+        return;
+      }
+
+      // Skip if user is already loaded
+      if (user) {
+        setSessionRestored(true);
+        return;
+      }
 
       try {
         const res = await api.get("/user/me");
         if (res.data?.success && res.data?.user) {
           dispatch(setUser(res.data.user));
+          
+          // Load cart after user is restored
+          try {
+            const cartRes = await api.get("/cart");
+            if (cartRes.data?.success) {
+              dispatch(setCart(cartRes.data.cart));
+            }
+          } catch {
+            dispatch(setCart(null));
+          }
         }
-      } catch {
-        localStorage.removeItem("accessToken");
-        dispatch(setUser(null));
+      } catch (error) {
+        // Only clear token if it's actually invalid (not network errors)
+        if (error?.response?.status === 401) {
+          localStorage.removeItem("accessToken");
+          dispatch(setUser(null));
+          dispatch(setCart(null));
+        }
+      } finally {
+        setSessionRestored(true);
       }
     };
 
     restoreSession();
-  }, [dispatch, user]);
+  }, [dispatch]); // Remove 'user' from dependencies to avoid re-runs
 
+  // Load cart when user changes (login/logout)
   React.useEffect(() => {
+    if (!sessionRestored) return; // Wait for initial session restoration
+
     const loadCart = async () => {
       const token = localStorage.getItem("accessToken");
-      if (!token) {
+      if (!token || !user) {
         dispatch(setCart(null));
         return;
       }
@@ -155,7 +184,7 @@ const App = () => {
     };
 
     loadCart();
-  }, [dispatch, user?.id, user?._id]);
+  }, [dispatch, user?._id, sessionRestored]);
 
   return (
     <>
