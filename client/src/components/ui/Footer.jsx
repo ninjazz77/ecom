@@ -18,6 +18,9 @@ const LINKS = [
     { label: "Returns", to: "/" },
     { label: "Track Order", to: "/" },
   ]},
+  { heading: "Admin", items: [
+    { label: "Admin Login", to: "/admin-login" },
+  ]},
 ];
 
 const Footer = () => (
@@ -26,7 +29,7 @@ const Footer = () => (
     <div className="glow-orb w-96 h-96 bg-violet-700 -bottom-48 left-1/2 -translate-x-1/2 opacity-15" />
 
     <div className="relative z-10 mx-auto max-w-7xl px-4 lg:px-6 pt-20 pb-10">
-      <div className="grid gap-10 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
+      <div className="grid gap-10 md:grid-cols-[1.5fr_1fr_1fr_1fr_1fr]">
         {/* Brand */}
         <div className="space-y-5">
           <Link to="/" className="flex items-center gap-3">

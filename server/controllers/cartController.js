@@ -44,7 +44,14 @@ const getUserCart = (userId) => populateCart(Cart.findOne({ userId }));
 
 export const getCart = async (req, res) => {
   try {
-    const userId = req.id;
+    const userId = req.userId || req.id || req.user?._id;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
 
     let cart = await getUserCart(userId);
     if (!cart) {
@@ -155,8 +162,15 @@ export const addToCart = async (req, res) => {
 
 export const updateQuantity = async (req, res) => {
   try {
-    const userId = req.id;
+    const userId = req.userId || req.id || req.user?._id;
     const { productId, type } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
 
     if (!["increase", "decrease"].includes(type)) {
       return res.status(400).json({
@@ -225,8 +239,15 @@ export const updateQuantity = async (req, res) => {
 
 export const removeFromCart = async (req, res) => {
   try {
-    const userId = req.id;
+    const userId = req.userId || req.id || req.user?._id;
     const { productId } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
 
     let cart = await Cart.findOne({ userId });
 

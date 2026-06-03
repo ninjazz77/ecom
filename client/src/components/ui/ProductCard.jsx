@@ -16,7 +16,7 @@ const ProductCard = ({ product, loading, onOpenDetails }) => {
 
   const addToCart = async (e) => {
     e.stopPropagation();
-    const token = localStorage.getItem("accessToken");
+    const token = localStorage.getItem("token");
     if (!token) {
       toast.error("Sign in to add items to cart.");
       setTimeout(() => navigate("/login"), 800);

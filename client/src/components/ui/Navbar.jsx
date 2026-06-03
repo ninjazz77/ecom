@@ -68,6 +68,7 @@ const Navbar = () => {
   const navLinks = [
     { to: "/", label: "Home" },
     { to: "/products", label: "Shop" },
+    { to: "/admin-login", label: "Admin", adminOnly: true },
   ];
 
   return (
@@ -93,19 +94,21 @@ const Navbar = () => {
 
           {/* Center nav */}
           <nav className="hidden lg:flex items-center gap-1">
-            {navLinks.map(({ to, label }) => (
-              <Link
-                key={to}
-                to={to}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                  location.pathname === to
-                    ? "bg-white/10 text-white"
-                    : "text-white/60 hover:text-white hover:bg-white/6"
-                }`}
-              >
-                {label}
-              </Link>
-            ))}
+            {navLinks
+              .filter(({ adminOnly }) => !adminOnly || !user)
+              .map(({ to, label }) => (
+                <Link
+                  key={to}
+                  to={to}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                    location.pathname === to
+                      ? "bg-white/10 text-white"
+                      : "text-white/60 hover:text-white hover:bg-white/6"
+                  }`}
+                >
+                  {label}
+                </Link>
+              ))}
           </nav>
 
           {/* Right actions */}
@@ -208,15 +211,17 @@ const Navbar = () => {
         {menuOpen && (
           <div className="lg:hidden border-t border-white/8 glass animate-fade-up">
             <div className="px-4 py-5 space-y-2">
-              {navLinks.map(({ to, label }) => (
-                <Link
-                  key={to}
-                  to={to}
-                  className="block px-4 py-3 rounded-2xl text-white/70 hover:text-white hover:bg-white/6 text-sm font-medium transition"
-                >
-                  {label}
-                </Link>
-              ))}
+              {navLinks
+                .filter(({ adminOnly }) => !adminOnly || !user)
+                .map(({ to, label }) => (
+                  <Link
+                    key={to}
+                    to={to}
+                    className="block px-4 py-3 rounded-2xl text-white/70 hover:text-white hover:bg-white/6 text-sm font-medium transition"
+                  >
+                    {label}
+                  </Link>
+                ))}
               {user?.role === "admin" && (
                 <Link
                   to="/admin"

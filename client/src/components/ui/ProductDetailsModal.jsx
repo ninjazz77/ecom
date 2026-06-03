@@ -54,7 +54,7 @@ const ProductDetailsModal = ({ product, onClose }) => {
     setActiveImg((p) => (p - 1 + images.length) % images.length);
 
   const addToCart = async () => {
-    const token = localStorage.getItem("accessToken");
+    const token = localStorage.getItem("token");
     if (!token) {
       toast.error("Sign in to add items to cart.");
       setTimeout(() => navigate("/login"), 800);

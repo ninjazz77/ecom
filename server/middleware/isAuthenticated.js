@@ -60,9 +60,10 @@ export const isAuthenticated = async (req, res, next) => {
       });
     }
 
-    // Attach user to request object
+    // Attach user to request object (standardize on req.userId and req.user)
     req.user = user;
     req.userId = user._id.toString();
+    req.id = user._id.toString(); // Backward compatibility
 
     next();
   } catch (error) {
