@@ -25,7 +25,7 @@ const AdminLogin = () => {
       const res = await api.post("/user/login", form);
       if (res.data.success && res.data.user?.role === "admin") {
         dispatch(setUser(res.data.user));
-        localStorage.setItem("accessToken", res.data.accessToken);
+        localStorage.setItem("token", res.data.token);
         toast.success("Admin access granted");
         navigate("/admin");
       } else {

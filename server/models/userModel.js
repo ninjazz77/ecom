@@ -2,39 +2,72 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-    firstName: { type: String, required: true, trim: true },
-    lastName: { type: String, required: true, trim: true },
-    profilePic: { type: String, default: "" },
-    profilePicPublicId: { type: String, default: "" },
-
+    firstName: {
+      type: String,
+      required: [true, "First name is required"],
+      trim: true,
+    },
+    lastName: {
+      type: String,
+      required: [true, "Last name is required"],
+      trim: true,
+    },
     email: {
       type: String,
-      required: true,
+      required: [true, "Email is required"],
       unique: true,
       trim: true,
       lowercase: true,
+      match: [/^\S+@\S+\.\S+$/, "Please enter a valid email"],
     },
-    password: { type: String, required: true },
-
-    role: { type: String, enum: ["user", "admin"], default: "user" },
-    isBlocked: { type: Boolean, default: false },
-
-    token: { type: String, default: null },
-
-    isVerified: { type: Boolean, default: false },
-    isLoggedIn: { type: Boolean, default: false },
-
-    otp: { type: String, default: null },
-    otpExpiry: { type: Date, default: null },
-
-    address: { type: [String], default: [] },
-    city: { type: String, default: "" },
-    state: { type: String, default: "" },
-    zipCode: { type: String, default: "" },
-    phoneNo: { type: String, default: "" },
-    phoneNumber: { type: String, default: "" },
+    password: {
+      type: String,
+      required: [true, "Password is required"],
+      minlength: [6, "Password must be at least 6 characters"],
+    },
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
+    },
+    profilePic: {
+      type: String,
+      default: "",
+    },
+    profilePicPublicId: {
+      type: String,
+      default: "",
+    },
+    isBlocked: {
+      type: Boolean,
+      default: false,
+    },
+    address: {
+      type: [String],
+      default: [],
+    },
+    city: {
+      type: String,
+      default: "",
+    },
+    state: {
+      type: String,
+      default: "",
+    },
+    zipCode: {
+      type: String,
+      default: "",
+    },
+    phoneNo: {
+      type: String,
+      default: "",
+    },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+  }
 );
 
-export default mongoose.model("User", userSchema);
+const User = mongoose.model("User", userSchema);
+
+export default User;

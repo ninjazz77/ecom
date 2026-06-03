@@ -50,7 +50,7 @@ const Navbar = () => {
     } catch {
       // Local logout should still proceed if the server session is gone.
     }
-    localStorage.removeItem("accessToken");
+    localStorage.removeItem("token");
     dispatch(setUser(null));
     dispatch(setCart(null));
     toast.success("See you soon!");

@@ -1,38 +1,33 @@
 import express from "express";
 import {
-  allUser,
-  blockUser,
-  changePassword,
-  changeUserRole,
-  forgotPassword,
-  getCurrentUser,
-  getUserById,
+  register,
   login,
   logout,
-  register,
-  reVerify,
+  getCurrentUser,
   updateUser,
+  allUser,
+  getUserById,
+  blockUser,
   unblockUser,
-  verify,
-  verifyOTP,
+  changeUserRole,
 } from "../controllers/userController.js";
-import { isAdmin, isAuthenticated } from "../middleware/isAuthenticated.js";
+import { isAuthenticated, isAdmin } from "../middleware/isAuthenticated.js";
 import { singleUpload } from "../middleware/multer.js";
 
 const router = express.Router();
 
+// Public routes
 router.post("/register", register);
-router.post("/verify", verify);
-router.post("/reVerify", reVerify);
 router.post("/login", login);
+
+// Protected routes (authentication required)
 router.post("/logout", isAuthenticated, logout);
-router.post("/forgot-password", forgotPassword);
-router.post("/verify-otp/:email", verifyOTP);
-router.post("/change-password/:email", changePassword);
 router.get("/me", isAuthenticated, getCurrentUser);
+router.put("/update/:id", isAuthenticated, singleUpload, updateUser);
+
+// Admin routes
 router.get("/all-user", isAuthenticated, isAdmin, allUser);
 router.get("/get-user/:userId", getUserById);
-router.put("/update/:id", isAuthenticated, singleUpload, updateUser);
 router.put("/block-user/:userId", isAuthenticated, isAdmin, blockUser);
 router.put("/unblock-user/:userId", isAuthenticated, isAdmin, unblockUser);
 router.put("/change-role/:userId", isAuthenticated, isAdmin, changeUserRole);

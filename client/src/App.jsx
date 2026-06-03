@@ -5,8 +5,6 @@ import Navbar from "./components/ui/Navbar";
 import Home from "./pages/Home";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
-import Verify from "./pages/Verify";
-import VerifyEmail from "./pages/VerifyEmail";
 import Footer from "./components/ui/Footer";
 import Profile from "./pages/Profile";
 import Products from "./pages/Products";
@@ -44,22 +42,6 @@ const router = createBrowserRouter([
     element: (
       <>
         <Login />
-      </>
-    ),
-  },
-  {
-    path: "/verify",
-    element: (
-      <>
-        <Verify />
-      </>
-    ),
-  },
-  {
-    path: "/verify/:token",
-    element: (
-      <>
-        <VerifyEmail />
       </>
     ),
   },
@@ -118,7 +100,7 @@ const App = () => {
 
   React.useEffect(() => {
     const restoreSession = async () => {
-      const token = localStorage.getItem("accessToken");
+      const token = localStorage.getItem("token");
       if (!token) {
         setSessionRestored(true);
         return;
@@ -148,7 +130,7 @@ const App = () => {
       } catch (error) {
         // Only clear token if it's actually invalid (not network errors)
         if (error?.response?.status === 401) {
-          localStorage.removeItem("accessToken");
+          localStorage.removeItem("token");
           dispatch(setUser(null));
           dispatch(setCart(null));
         }
@@ -165,7 +147,7 @@ const App = () => {
     if (!sessionRestored) return; // Wait for initial session restoration
 
     const loadCart = async () => {
-      const token = localStorage.getItem("accessToken");
+      const token = localStorage.getItem("token");
       if (!token || !user) {
         dispatch(setCart(null));
         return;
